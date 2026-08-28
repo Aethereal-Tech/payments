@@ -1,0 +1,19 @@
+{
+  "result": "OK",
+  "uuid": "abcde12345abcde12345",
+  "merchantTransactionId": "auto-2019-09-02-0012",
+  "purchaseId": "20191210-abcde12345abcde12345",
+  "transactionType": "CHARGEBACK-REVERSAL",
+  "paymentMethod": "Creditcard",
+  "amount": "9.99",
+  "currency": "EUR",
+  "chargebackReversalData": {
+    "originalUuid": "0r1gIN4luU1D",
+    "originalMerchantTransactionId": "2019-09-02-0011",
+    "chargebackUuid": "Ch4rG3baCkUu1D",
+    "amount": "9.99",
+    "currency": "EUR",
+    "reason": "Chargeback reversed",
+    "reversalDateTime": "2019-10-15T16:22:12Z"
+  }
+}

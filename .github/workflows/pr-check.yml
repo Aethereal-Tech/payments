@@ -1,0 +1,43 @@
+name: PR Check
+
+# The same build a release runs, minus the publishing. If this is red, master would be too.
+on:
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+# A superseded run on a pull request is pure waste — the next push supersedes its verdict anyway.
+concurrency:
+  group: pr-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Build and verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      # `verify`, not `test`, because the JaCoCo coverage gate binds to the verify phase. Running
+      # tests alone would report green on a change that drops coverage below the floor.
+      - name: Verify
+        run: ./mvnw --batch-mode clean verify
+
+      - name: Publish coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report
+          path: target/site/jacoco/
+          if-no-files-found: warn

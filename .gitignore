@@ -1,0 +1,27 @@
+target/
+!.mvn/wrapper/maven-wrapper.jar
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# IDEs
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.classpath
+.project
+nbproject/
+build/
+out/
+bin/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local overrides that must never reach a public repository
+settings.xml
+*.env
+.env

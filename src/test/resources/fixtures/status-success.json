@@ -1,0 +1,36 @@
+{
+  "success": true,
+  "transactionStatus": "SUCCESS",
+  "uuid": "abcde12345abcde12345",
+  "merchantTransactionId": "2019-09-02-0001",
+  "purchaseId": "20190902-abcde12345abcde12345",
+  "transactionType": "debit",
+  "paymentMethod": "Creditcard",
+  "amount": "9.99",
+  "currency": "EUR",
+  "customer": {
+    "firstName": "John",
+    "lastName": "Doe",
+    "company": "ACME Corp.",
+    "emailVerified": true
+  },
+  "extraData": {
+    "someKey": "someValue",
+    "otherKey": "otherValue"
+  },
+  "returnData": {
+    "creditcardData": {
+      "type": "visa",
+      "cardHolder": "John Doe",
+      "expiryMonth": 12,
+      "expiryYear": 2030,
+      "binDigits": "12345678",
+      "firstSixDigits": "123456",
+      "lastFourDigits": "4321",
+      "threeDSecure": "OFF",
+      "binBrand": "VISA",
+      "binBank": "SOME BIG BANK",
+      "binCountry": "US"
+    }
+  }
+}

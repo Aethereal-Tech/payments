@@ -1,0 +1,32 @@
+{
+  "result": "OK",
+  "uuid": "abcde12345abcde12345",
+  "merchantTransactionId": "2019-09-02-0007",
+  "purchaseId": "20190927-abcde12345abcde12345",
+  "transactionType": "DEBIT",
+  "paymentMethod": "DirectDebit",
+  "amount": "9.99",
+  "currency": "EUR",
+  "customer": {
+    "firstName": "John",
+    "lastName": "Doe",
+    "emailVerified": "false"
+  },
+  "returnData": {
+    "_TYPE": "cardData",
+    "type": "visa",
+    "cardHolder": "John Doe",
+    "expiryMonth": "12",
+    "expiryYear": "2022",
+    "binDigits": "41111111",
+    "firstSixDigits": "411111",
+    "lastFourDigits": "1111",
+    "fingerprint": "9s92FBBvMuw7nn8t7ChHDRuFXS6gZOnHymbGnO/BZBUw3j25LW6dcl50aHWTcdJtSFDvTqLPM4stZLbGb6EVpQ",
+    "threeDSecure": "OFF",
+    "binBrand": "VISA",
+    "binBank": "JPMORGAN CHASE BANK N.A.",
+    "binType": "",
+    "binLevel": "",
+    "binCountry": "US"
+  }
+}

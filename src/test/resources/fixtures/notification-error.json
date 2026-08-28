@@ -1,0 +1,19 @@
+{
+  "result": "ERROR",
+  "message": "STOLEN_CARD",
+  "code": "2016",
+  "adapterMessage": "Transaction was rejected",
+  "adapterCode": "1234",
+  "uuid": "abcde12345abcde12345",
+  "merchantTransactionId": "2019-09-02-0008",
+  "purchaseId": "20190927-abcde12345abcde12345",
+  "transactionType": "DEBIT",
+  "paymentMethod": "DirectDebit",
+  "amount": "9.99",
+  "currency": "EUR",
+  "customer": {
+    "firstName": "John",
+    "lastName": "Doe",
+    "emailVerified": "false"
+  }
+}

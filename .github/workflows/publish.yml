@@ -1,0 +1,190 @@
+name: Publish
+
+# What happens to master: the full verification a pull request gets, and then — only if it passes —
+# a versioned release published to GitHub Packages, tagged, and cut as a GitHub release.
+#
+# Verification and publication in ONE workflow rather than chained by `workflow_run`, so the release
+# job simply `needs:` the check. There is no window in which master is green but unpublished for
+# reasons nobody can see.
+on:
+  push:
+    branches: [master]
+  # Manual re-cut, e.g. after fixing this workflow itself.
+  workflow_dispatch:
+
+# Deliberately NOT cancel-in-progress. On a pull request a superseded run is waste; here it would
+# leave a merged commit with no verdict and possibly no release.
+concurrency:
+  group: publish-${{ github.sha }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write   # create tags and releases
+  packages: write   # publish to GitHub Packages
+
+jobs:
+  verify:
+    name: Build and verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Verify
+        run: ./mvnw --batch-mode clean verify
+
+  release:
+    name: Cut a release
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The whole history, because the next version is derived from the commits since the last
+          # tag rather than stored anywhere.
+          fetch-depth: 0
+
+      # SemVer, decided by the commits themselves. This repository writes conventional messages, so
+      # the bump is a fact about the change rather than a number someone remembers to increment:
+      #
+      #   BREAKING CHANGE, or a ! after the type   -> major
+      #   feat                                     -> minor
+      #   fix | perf | refactor                    -> patch
+      #   only ci/docs/chore/test/style            -> no release at all
+      #
+      # That last line matters: a workflow tweak should not mint a version, or every release becomes
+      # noise and "what changed" stops being answerable from the tag list.
+      #
+      # Commit text reaches the shell only as quoted git output piped to grep — never interpolated
+      # into a command — so a cute commit message cannot run anything here.
+      - name: Work out the next version
+        id: version
+        run: |
+          set -euo pipefail
+          last=$(git describe --tags --abbrev=0 --match 'v[0-9]*' 2>/dev/null || echo "")
+          if [ -z "$last" ]; then
+            # Seeded at 0.1.0, NOT the 1.0.0 this derivation was adapted from. A 1.0.0 is a promise
+            # of API stability, and this library models a documentation set with several open
+            # questions in it (see the README). 0.x says the surface may still move.
+            echo "No previous tag; seeding at v0.1.0."
+            echo "version=0.1.0" >> "$GITHUB_OUTPUT"
+            echo "release=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          subjects=$(git log --format='%s' "${last}..HEAD")
+          bodies=$(git log --format='%B' "${last}..HEAD")
+          echo "Commits since ${last}:"; printf '%s\n' "$subjects" | sed 's/^/    /'
+
+          bump=none
+          if printf '%s' "$bodies" | grep -q 'BREAKING CHANGE' \
+             || printf '%s' "$subjects" | grep -qE '^[a-z]+(\([^)]*\))?!:'; then
+            bump=major
+          elif printf '%s' "$subjects" | grep -qE '^feat(\([^)]*\))?:'; then
+            bump=minor
+          elif printf '%s' "$subjects" | grep -qE '^(fix|perf|refactor)(\([^)]*\))?:'; then
+            bump=patch
+          fi
+
+          if [ "$bump" = "none" ]; then
+            echo "Nothing release-worthy since ${last} (only chore-level commits)."
+            echo "release=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          IFS=. read -r major minor patch <<< "${last#v}"
+          case "$bump" in
+            major) major=$((major + 1)); minor=0; patch=0 ;;
+            minor) minor=$((minor + 1)); patch=0 ;;
+            patch) patch=$((patch + 1)) ;;
+          esac
+          echo "Bump: ${bump} -> ${major}.${minor}.${patch}"
+          echo "version=${major}.${minor}.${patch}" >> "$GITHUB_OUTPUT"
+          echo "release=true" >> "$GITHUB_OUTPUT"
+          echo "previous=${last}" >> "$GITHUB_OUTPUT"
+
+      # Two merges landing within minutes of each other each get their own run (by design — see the
+      # concurrency note above), and if both reach this point before either has tagged, both derive
+      # the same number. Caught here rather than later in `gh release create`, whose own error says
+      # only that a tag exists and nothing about why. Re-running this workflow fixes it.
+      - name: That version must not already exist
+        if: steps.version.outputs.release == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          if gh release view "v${VERSION}" >/dev/null 2>&1; then
+            echo "::error::v${VERSION} already exists — another run tagged it first. Re-run this workflow."
+            exit 1
+          fi
+
+      - name: Setup JDK
+        if: steps.version.outputs.release == 'true'
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: 'maven'
+          # Writes the settings.xml that maps the pom's `github` server id to this run's token, so
+          # `mvn deploy` authenticates without a checked-in credential.
+          server-id: github
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
+
+      # The version is stamped into the build rather than committed. Keeping pom.xml on a SNAPSHOT
+      # means no version-bump commit, no merge conflicts over a number, and one source of truth: the
+      # tag. `-DskipTests` because the verify job already ran them against this exact commit.
+      - name: Publish to GitHub Packages
+        if: steps.version.outputs.release == 'true'
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          MAVEN_USERNAME: ${{ github.actor }}
+          MAVEN_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          ./mvnw --batch-mode versions:set -DnewVersion="$VERSION" -DgenerateBackupPoms=false
+          ./mvnw --batch-mode -DskipTests deploy
+
+      - name: Tag and release
+        if: steps.version.outputs.release == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+          PREVIOUS: ${{ steps.version.outputs.previous }}
+        run: |
+          set -euo pipefail
+          notes=$(mktemp)
+          {
+            echo "Built from \`$(git rev-parse --short HEAD)\`, which passed CI in full."
+            echo
+            echo '```xml'
+            echo '<dependency>'
+            echo '    <groupId>net.aetherealtech</groupId>'
+            echo '    <artifactId>bankart-gateway</artifactId>'
+            echo "    <version>${VERSION}</version>"
+            echo '</dependency>'
+            echo '```'
+            echo
+            echo "GitHub Packages needs a token even for public artifacts — see the README for the settings.xml."
+            echo
+            if [ -n "${PREVIOUS:-}" ]; then
+              echo "### Changes since ${PREVIOUS}"
+              git log --format='- %s' "${PREVIOUS}..HEAD"
+            else
+              echo "First release."
+            fi
+          } > "$notes"
+          gh release create "v${VERSION}" \
+            --title "v${VERSION}" \
+            --notes-file "$notes" \
+            --target "$(git rev-parse HEAD)" \
+            target/bankart-gateway-"${VERSION}".jar

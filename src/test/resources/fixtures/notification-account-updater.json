@@ -1,0 +1,28 @@
+{
+  "result": "OK",
+  "uuid": "abcde12345abcde12345",
+  "merchantTransactionId": "2019-09-02-0012",
+  "purchaseId": "20191210-abcde12345abcde12345",
+  "transactionType": "REGISTER",
+  "paymentMethod": "Creditcard",
+  "extraData": {
+    "lastCardUpdateDate": "2022-08-19",
+    "lastCardUpdateResult": "updated"
+  },
+  "returnData": {
+    "_TYPE": "cardData",
+    "type": "mastercard",
+    "cardHolder": "Firstname Lastname",
+    "expiryMonth": "12",
+    "expiryYear": "2050",
+    "binDigits": "55555555",
+    "firstSixDigits": "555555",
+    "lastFourDigits": "4444",
+    "fingerprint": "YQTgkfrQJYzExJYmomJBS0tWMF8D5J0jG/DAtes3X5oVElUNEbOld5lakWbgdUrW8VHKpNqFfJCMVakh+2LsoA",
+    "binBrand": "MASTERCARD",
+    "binBank": "SOME BANK",
+    "binType": "CREDIT",
+    "binLevel": "STANDARD",
+    "binCountry": "US"
+  }
+}
