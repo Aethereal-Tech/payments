@@ -146,9 +146,12 @@ class BankartClientErrorsTest extends GatewayTestBase {
 
     @Test
     void timeoutsAreTransportFailures() {
+        // The delay is kept short and the client's deadline far shorter, rather than the reverse.
+        // A long in-flight response outlives the test and can still be arriving while the next one
+        // resets the stubs — the only cross-test race this suite has room for.
         gateway.stubFor(post(urlEqualTo(transactionPath("debit")))
-                .willReturn(aResponse().withStatus(200).withFixedDelay(2000).withBody("{}")));
-        BankartClient impatient = new BankartClient(signingConfig().withTimeout(Duration.ofMillis(200)));
+                .willReturn(aResponse().withStatus(200).withFixedDelay(600).withBody("{}")));
+        BankartClient impatient = new BankartClient(signingConfig().withTimeout(Duration.ofMillis(50)));
 
         assertThatExceptionOfType(BankartTransportException.class).isThrownBy(() -> impatient.debit(ANY_DEBIT));
     }
