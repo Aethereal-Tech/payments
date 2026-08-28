@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 
 /**
  * The one mapper configuration this library uses, in one place, so that a body signed by
@@ -19,9 +20,10 @@ public final class Json {
     }
 
     public static ObjectMapper mapper() {
-        return new ObjectMapper()
-                .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+        return JsonMapper.builder()
+                .serializationInclusion(JsonInclude.Include.NON_NULL)
                 .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                .build();
     }
 }
