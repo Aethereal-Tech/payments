@@ -445,11 +445,14 @@ Neither consumer is in production against a live gateway.
 
 Per module, in each module's own pom, as ratchets.
 
-| Module | Line | Branch |
-|---|---|---|
-| `payments-core` | 90% | 80% |
-| `payments-bankart` | 90% | 80% |
-| `payments-agentaos` | 90% | 80% |
+| Module | Floor (line / branch) | Achieved | Tests |
+|---|---|---|---|
+| `payments-core` | 90% / 80% | 99.4% / 97.2% | 206 |
+| `payments-bankart` | 90% / 80% | 96.7% / 93.2% | 201 |
+| `payments-agentaos` | 90% / 80% | 99.0% / 93.7% | 221 |
+
+No test reaches a live gateway. Bankart's are WireMock against fixtures copied from the spec's own
+examples; AgentaOS's are WireMock plus signature vectors computed independently of the class under test.
 
 # FUTURE
 

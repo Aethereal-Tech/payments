@@ -121,12 +121,6 @@ over and never a module left naming a parent version that no longer exists.
 `v0.1.0` was `net.aetherealtech:bankart-gateway`, a single artifact, and it stays published as the last
 release under that name. The reactor's first release is `v0.2.0` at the three coordinates above.
 
-**A merge is not finished until the branch is gone and the issue is closed.** Delete the merged branch,
-local and remote, in the same step as the merge, and close every GitHub issue the merge resolved with a
-comment naming the pull request or commit. A branch left behind is one somebody branches off next week, and
-an issue left open is one somebody works twice. Merged branches only: a parked branch stays until its work
-lands.
-
 **This is a PRIVATE repository.** A consuming build needs a token with access to the organization's private
 packages — `read:packages` alone is not enough, unlike a public GitHub Packages artifact. Keep the README's
 Install section saying so, and keep it free of "public" wording and of any invitation to outside

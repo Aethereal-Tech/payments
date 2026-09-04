@@ -156,6 +156,25 @@ cancellation itself and call `cancelSubscription` when the period ends. **Agenta
 no refund, reverse or reversal method anywhere in its SDK, and this library refuses rather than guessing at
 an endpoint.
 
+### What each adapter declares
+
+| | Bankart | AgentaOS |
+|---|---|---|
+| `HOSTED_CHECKOUT` | yes | yes |
+| `RECURRING_CHECKOUT` | yes — needs a `Recurrence`; it has no plan catalogue | yes — needs a `planRef`; it has no cadence on a checkout |
+| `MACHINE_PAYMENT_URL` | no | yes — the `x402Url` |
+| `WEBHOOK_SIGNATURE` | yes | yes |
+| `REFUND` | yes | **no** — the SDK exposes none, so the adapter refuses rather than inventing one |
+| `SUBSCRIPTIONS` | yes — the schedule API | yes |
+| `CANCEL_AT_PERIOD_END` | **no** — `cancelSchedule` takes no such flag anywhere in the spec | yes |
+| `PLAN_CHANGE` | yes — `updateSchedule` | yes |
+| `RECONCILE` | yes — `showSchedule` | yes — by paging the list; there is no retrieve endpoint |
+| `TOKENIZATION` | yes — register/deregister | no |
+
+Two of those absences are the point of asking rather than assuming. `cancelSubscription(ref, true)` on
+Bankart throws instead of cancelling immediately and calling it done — which would take away access
+somebody paid for. `refund(...)` on AgentaOS throws instead of guessing at an endpoint.
+
 **Money** is a `BigDecimal` plus an ISO 4217 code, everywhere. The providers disagree with each other and
 with themselves — Bankart takes decimal strings, AgentaOS mixes decimal amounts on checkouts with integer
 minor units on subscriptions — and converting is the adapter's job, done once where the resource is known.
@@ -213,7 +232,9 @@ Branch on codes, never on messages. Both providers reserve the right to reword m
 BankartConfig config = BankartConfig.production(
         "yourApiKey", "yourApiUser", "yourApiPassword", "yourSharedSecret");
 
-PaymentProvider payments = new BankartPaymentProvider(config);
+PaymentProvider payments = new BankartPaymentProvider(
+        new BankartClient(config),
+        new NotificationVerifier(config.sharedSecret()));
 
 RedirectTarget target = payments.startCheckout(
         PaymentIntent.builder("order-2026-0001")
@@ -247,7 +268,8 @@ the status lookups.
 ## Quickstart — AgentaOS
 
 ```java
-AgentaOsConfig config = AgentaOsConfig.of("sk_live_…", "whsec_…");
+AgentaOsConfig config = AgentaOsConfig.of("sk_live_…")
+        .withWebhookSecret("whsec_…");
 
 PaymentProvider payments = new AgentaOsPaymentProvider(config);
 
