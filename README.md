@@ -84,10 +84,12 @@ private packages:
 The `<id>` must match the `<repository><id>` above.
 
 **From another repository's GitHub Actions**, the workflow's own `GITHUB_TOKEN` is scoped to that repository
-and cannot read this one's packages. Either grant the consuming repository read access in this package's
-settings, or give the workflow a token of the kind above as a secret. A build that skips this fails while
-*resolving the dependency*, not at some later step — the error names the artifact, so it is at least
-self-explanatory.
+and can never read this one's packages — GitHub Packages for Maven always inherit the permissions of the
+repository that published them, and there is no per-package Actions access grant to widen that. The only
+credential that works is a token of the kind above, given to the workflow as a secret (Aethereal-Tech
+repositories use the organization secret `PACKAGES_READ_TOKEN`, wired into `actions/setup-java` as
+`server-password: PACKAGES_READ_TOKEN`). A build that skips this fails while *resolving the dependency*, not
+at some later step — the error names the artifact, so it is at least self-explanatory.
 
 ## Upgrading from `bankart-gateway` 0.1.0
 
