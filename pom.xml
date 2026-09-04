@@ -77,10 +77,23 @@
                 <version>${project.version}</version>
             </dependency>
 
+            <!-- The Jackson BOM, for the same reason as the JUnit one above and learned the same
+                 painful way: pinning `jackson-databind` ALONE while WireMock drags in its own
+                 `jackson-annotations` and `jackson-core` produced databind 2.22.2 against annotations
+                 2.20, and the first WireMock stub failed with
+                 `NoClassDefFoundError: com/fasterxml/jackson/annotation/JsonSerializeAs` — a class
+                 that exists in 2.22 and not in 2.20. Nearest-wins mediation cannot see that the two
+                 are one library; the BOM pins the whole family so they move together.
+
+                 It is `dependencyManagement`, so it constrains versions without adding anything to a
+                 classpath: `payments-agentaos` and `payments-core` still resolve zero Jackson at
+                 compile or runtime, and only `payments-bankart` actually depends on it. -->
             <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
                 <version>${jackson.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
 
             <dependency>
