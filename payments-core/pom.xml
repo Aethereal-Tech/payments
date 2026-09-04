@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>net.aetherealtech</groupId>
+        <artifactId>payments</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>payments-core</artifactId>
+    <packaging>jar</packaging>
+
+    <name>Aethereal Payments — core</name>
+    <description>The provider-neutral payments SPI: the model, the events, the refusals, and a recording test double.</description>
+
+    <!-- ZERO runtime dependencies, and that is the artifact's whole promise. Everything here is
+         records, enums, a sealed interface and four exception classes; a consumer adding this to a
+         classpath adds nothing else. The adapters are where dependencies live, one per module, so a
+         consumer that only ever talks to AgentaOS never resolves Jackson at all. -->
+    <dependencies/>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals><goal>prepare-agent</goal></goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>verify</phase>
+                        <goals><goal>report</goal></goals>
+                    </execution>
+                    <execution>
+                        <id>check</id>
+                        <phase>verify</phase>
+                        <goals><goal>check</goal></goals>
+                        <configuration>
+                            <rules>
+                                <rule>
+                                    <element>BUNDLE</element>
+                                    <!-- JaCoCo class patterns are ANT-style over the .class file PATH,
+                                         so the separator is '/', never '.'. A dotted pattern matches
+                                         nothing, and an includes filter matching nothing makes the
+                                         ratio check pass VACUOUSLY — a gate reporting success at any
+                                         real coverage. -->
+                                    <includes>
+                                        <include>net/aetherealtech/payments/*</include>
+                                        <include>net/aetherealtech/payments/event/*</include>
+                                        <include>net/aetherealtech/payments/exception/*</include>
+                                        <include>net/aetherealtech/payments/testing/*</include>
+                                    </includes>
+                                    <!-- What this gate actually covers, since "a module of records" is
+                                         exactly the shape where a percentage can be met by touching
+                                         nothing that matters:
+                                           - every compact constructor that REFUSES something (Money's
+                                             currency check, PaymentIntent's amount-or-plan rule,
+                                             EventHeader's blank ids), asserted on the refusal, not on
+                                             the happy path;
+                                           - the defensive copies and the case-insensitive header
+                                             lookup in InboundWebhook, which is what stands between a
+                                             re-cased header and a webhook refused as an attack;
+                                           - every builder, because a builder that drops a field is a
+                                             silent data loss an adapter cannot see;
+                                           - RecordingPaymentProvider in full, since a consumer's whole
+                                             suite is only as trustworthy as this double.
+                                         Accessors and enum constants are carried along by those; they
+                                         are not what the number is for. -->
+                                    <limits>
+                                        <limit>
+                                            <counter>LINE</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.90</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>BRANCH</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.80</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

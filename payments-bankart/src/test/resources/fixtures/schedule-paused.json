@@ -1,0 +1,6 @@
+{
+  "success": true,
+  "scheduleId": "SC-1234-1234-1234-1234-1234-1234",
+  "oldStatus": "ACTIVE",
+  "newStatus": "PAUSED"
+}

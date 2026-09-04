@@ -1,0 +1,23 @@
+{
+  "items": [
+    {
+      "id": "sub_aaa",
+      "customer_email": "first@example.com",
+      "customer_name": "First Buyer",
+      "plan_name": "Starter",
+      "link_id": "pl_starter",
+      "billing_interval": "month",
+      "status": "active",
+      "unit_amount_minor": 999,
+      "currency": "EUR",
+      "current_period_end": "2026-10-01T00:00:00Z",
+      "stripe_subscription_id": "sub_stripe_aaa",
+      "cancel_at_period_end": false,
+      "canceled_at": null,
+      "effective_cancel_date": null,
+      "pending_plan_change": null
+    }
+  ],
+  "total": 2,
+  "has_more": true
+}

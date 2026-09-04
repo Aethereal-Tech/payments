@@ -1,0 +1,9 @@
+{
+  "success": true,
+  "options": {
+    "bank1": "Bank One",
+    "bank2": "Bank Two",
+    "bank3": "Bank Three",
+    "bank4": "Bank Four"
+  }
+}

@@ -1,0 +1,1 @@
+{"type":"checkout.session.completed","data":{"linkId":"pl_9d3","sessionId":"cs_live_9Kq2m4","amount":"29.99","currency":"EUR","txHash":"0xabc123","payer":"0xdeadbeef","payerType":"agent","network":"eip155:8453","livemode":true,"metadata":{"merchantReference":"order-4471","campaign":"spring"}}}

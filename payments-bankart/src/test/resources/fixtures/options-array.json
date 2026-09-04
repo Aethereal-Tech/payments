@@ -1,0 +1,7 @@
+{
+  "success": true,
+  "options": [
+    { "key": "bank1", "value": "Bank One" },
+    { "key": "bank2", "value": "Bank Two" }
+  ]
+}

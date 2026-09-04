@@ -1,0 +1,13 @@
+{
+  "result": "OK",
+  "uuid": "abcde12345abcde12347",
+  "merchantTransactionId": "2019-09-02-0031",
+  "transactionType": "DEBIT",
+  "paymentMethod": "CarrierBilling",
+  "returnData": {
+    "_TYPE": "phoneData",
+    "phoneNumber": "+38970123456",
+    "country": "MK",
+    "operator": "A1"
+  }
+}

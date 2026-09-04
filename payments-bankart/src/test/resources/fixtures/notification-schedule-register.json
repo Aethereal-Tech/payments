@@ -1,0 +1,12 @@
+{
+  "result": "OK",
+  "uuid": "abcde01234abcde01234",
+  "merchantTransactionId": "2019-09-02-0020",
+  "transactionType": "REGISTER",
+  "paymentMethod": "Creditcard",
+  "scheduleData": {
+    "scheduleId": "SC-1234-1234-1234-1234-1234-1234",
+    "scheduleStatus": "ACTIVE",
+    "scheduledAt": "2019-09-30T12:00:00+00:00"
+  }
+}

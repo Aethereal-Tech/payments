@@ -1,0 +1,14 @@
+{
+  "result": "ERROR",
+  "uuid": "cdefa34567cdefa34570",
+  "merchantTransactionId": "2019-09-02-0024",
+  "transactionType": "DEBIT",
+  "amount": "9.99",
+  "currency": "EUR",
+  "message": "The transaction was declined",
+  "code": 2016,
+  "scheduleData": {
+    "scheduleId": "SC-1234-1234-1234-1234-1234-1234",
+    "scheduleStatus": "ERROR"
+  }
+}
