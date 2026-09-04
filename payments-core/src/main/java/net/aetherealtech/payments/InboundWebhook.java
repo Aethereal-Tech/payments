@@ -40,8 +40,11 @@ public record InboundWebhook(String method, byte[] body, String requestUri, Map<
         // an attack, and would be handled as one.
         final Map<String, String> insensitive = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         if (headers != null) {
+            // Map.copyOf below refuses a null value outright, and header() already treats a null
+            // value as absent — so a null-valued entry is dropped here rather than left to blow up
+            // construction over a header the caller was never going to be able to read anyway.
             headers.forEach((name, value) -> {
-                if (name != null) {
+                if (name != null && value != null) {
                     insensitive.put(name, value);
                 }
             });
