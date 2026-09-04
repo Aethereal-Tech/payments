@@ -58,11 +58,15 @@
                             <rules>
                                 <rule>
                                     <element>BUNDLE</element>
+                                    <!-- ANT-style over the .class file PATH: '/' separators, never
+                                         '.'. A pattern that matches nothing makes the ratio check
+                                         pass vacuously at any real coverage, so these name only
+                                         packages that exist — this module raises no exceptions of
+                                         its own and has no `exception` package to list. -->
                                     <includes>
                                         <include>net/aetherealtech/payments/agentaos/*</include>
                                         <include>net/aetherealtech/payments/agentaos/model/*</include>
                                         <include>net/aetherealtech/payments/agentaos/internal/*</include>
-                                        <include>net/aetherealtech/payments/agentaos/exception/*</include>
                                     </includes>
                                     <limits>
                                         <limit>

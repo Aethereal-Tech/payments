@@ -1,0 +1,28 @@
+{
+  "items": [
+    {
+      "id": "sub_bbb",
+      "customer_email": "second@example.com",
+      "customer_name": "Second Buyer",
+      "plan_name": "Pro",
+      "link_id": "pl_9d3",
+      "billing_interval": "year",
+      "status": "past_due",
+      "unit_amount_minor": 1999,
+      "currency": "EUR",
+      "current_period_end": "2026-09-01T00:00:00Z",
+      "stripe_subscription_id": "sub_stripe_bbb",
+      "cancel_at_period_end": true,
+      "canceled_at": "2026-08-20T10:00:00Z",
+      "effective_cancel_date": "2026-09-01T00:00:00Z",
+      "pending_plan_change": {
+        "link_id": "pl_starter",
+        "plan_name": "Starter",
+        "unit_amount_minor": 999,
+        "effective_at": "2026-09-01T00:00:00Z"
+      }
+    }
+  ],
+  "total": 2,
+  "has_more": false
+}

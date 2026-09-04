@@ -1,0 +1,1 @@
+{"type":"subscription.renewed","data":{"id":"sub_bbb","status":"active","planName":"Pro","linkId":"pl_9d3","currency":"EUR","amountMinor":1999,"currentPeriodEnd":"2026-11-01T00:00:00Z","cancelAtPeriodEnd":false,"pendingPlan":null,"customerEmail":"second@example.com","customerName":"Second Buyer","livemode":true}}

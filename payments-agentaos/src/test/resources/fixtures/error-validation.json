@@ -1,0 +1,7 @@
+{
+  "message": "amount is required",
+  "errors": [
+    { "field": "amount", "message": "must be a positive number" },
+    { "field": "currency", "message": "must be EUR or USD" }
+  ]
+}

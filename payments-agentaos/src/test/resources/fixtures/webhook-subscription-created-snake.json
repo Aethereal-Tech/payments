@@ -1,0 +1,1 @@
+{"type":"subscription.created","data":{"id":"sub_snake","status":"active","plan_name":"Pro","link_id":"pl_9d3","currency":"EUR","amount_minor":1999,"current_period_end":"2026-10-01T00:00:00Z","cancel_at_period_end":false,"pending_plan":null,"customer_email":"snake@example.com","customer_name":"Snake Case","livemode":true}}
