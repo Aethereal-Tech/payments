@@ -5,13 +5,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>net.aetherealtech</groupId>
-    <artifactId>bankart-gateway</artifactId>
+    <artifactId>payments</artifactId>
     <version>0.1.0-SNAPSHOT</version>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
 
-    <name>Bankart Payment Gateway Client</name>
-    <description>A minimal-dependency Java client for the Bankart Payment Gateway Transaction API v3.</description>
-    <url>https://github.com/Aethereal-Tech/bankart-gateway</url>
+    <name>Aethereal Payments (parent)</name>
+    <description>A provider-neutral payments SPI for Java, with Bankart and AgentaOS adapters.</description>
+    <url>https://github.com/Aethereal-Tech/payments</url>
 
     <licenses>
         <license>
@@ -22,9 +22,26 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:https://github.com/Aethereal-Tech/bankart-gateway.git</connection>
-        <url>https://github.com/Aethereal-Tech/bankart-gateway</url>
+        <connection>scm:git:https://github.com/Aethereal-Tech/payments.git</connection>
+        <url>https://github.com/Aethereal-Tech/payments</url>
     </scm>
+
+    <!-- Three artifacts, one repository, one version, one release. The split is about the DEPENDENCY,
+         not about tidiness: `payments-core` and `payments-agentaos` have zero runtime dependencies and
+         `payments-bankart` has one (Jackson 2). Merging them would put Jackson 2 on the classpath of a
+         consumer that only ever talks to AgentaOS — and at least one of them runs Jackson 3, where an
+         unwanted Jackson 2 is not a version conflict Maven can mediate but a second, differently-named
+         library nobody asked for.
+
+         Splitting them at the VERSION instead — three release trains — would let a consumer resolve
+         payments-core:0.3.0 against payments-bankart:0.1.0 and meet the mismatch as a NoSuchMethodError
+         at the first webhook. All three are published from the same commit at the same number precisely
+         so that cannot happen. -->
+    <modules>
+        <module>payments-core</module>
+        <module>payments-bankart</module>
+        <module>payments-agentaos</module>
+    </modules>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -40,58 +57,112 @@
         <jacoco.version>0.8.15</jacoco.version>
     </properties>
 
-    <dependencies>
-        <!-- The ONLY runtime dependency. HTTP is java.net.http, notifications are JSON (see README:
-             the integration guide's "notification XML" wording is stale), so nothing else is needed. -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
-        </dependency>
+    <dependencyManagement>
+        <dependencies>
+            <!-- The JUnit BOM, imported rather than pinned one artifact at a time: a test dependency
+                 that brings its OWN JUnit is how the platform ends up misaligned, and the launcher's
+                 answer to that is to discover no tests at all rather than to fail loudly. The BOM pins
+                 the whole family — jupiter 5.x and platform 1.x move together. -->
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${junit.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
 
+            <dependency>
+                <groupId>net.aetherealtech</groupId>
+                <artifactId>payments-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter</artifactId>
+                <version>${junit.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-core</artifactId>
+                <version>${assertj.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.wiremock</groupId>
+                <artifactId>wiremock</artifactId>
+                <version>${wiremock.version}</version>
+                <scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>${assertj.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.wiremock</groupId>
-            <artifactId>wiremock</artifactId>
-            <version>${wiremock.version}</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.15.0</version>
+                    <configuration>
+                        <compilerArgs>
+                            <arg>-Xlint:all,-serial</arg>
+                        </compilerArgs>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>3.5.6</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>3.4.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>3.12.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>${jacoco.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.15.0</version>
-                <configuration>
-                    <compilerArgs>
-                        <arg>-Xlint:all,-serial</arg>
-                    </compilerArgs>
-                </configuration>
             </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.5.6</version>
             </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.4.0</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -99,11 +170,9 @@
                     </execution>
                 </executions>
             </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.12.0</version>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
@@ -115,50 +184,6 @@
                     <quiet>true</quiet>
                 </configuration>
             </plugin>
-
-            <!-- Strict from day one, deliberately. This library moves money; a line nobody executed in
-                 a test is a line nobody has seen behave. Raising the floor later is easy, and a gate
-                 introduced after the fact is one that gets argued down instead of met. -->
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>${jacoco.version}</version>
-                <executions>
-                    <execution>
-                        <id>prepare-agent</id>
-                        <goals><goal>prepare-agent</goal></goals>
-                    </execution>
-                    <execution>
-                        <id>report</id>
-                        <phase>verify</phase>
-                        <goals><goal>report</goal></goals>
-                    </execution>
-                    <execution>
-                        <id>check</id>
-                        <phase>verify</phase>
-                        <goals><goal>check</goal></goals>
-                        <configuration>
-                            <rules>
-                                <rule>
-                                    <element>BUNDLE</element>
-                                    <limits>
-                                        <limit>
-                                            <counter>LINE</counter>
-                                            <value>COVEREDRATIO</value>
-                                            <minimum>0.90</minimum>
-                                        </limit>
-                                        <limit>
-                                            <counter>BRANCH</counter>
-                                            <value>COVEREDRATIO</value>
-                                            <minimum>0.80</minimum>
-                                        </limit>
-                                    </limits>
-                                </rule>
-                            </rules>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
 
@@ -166,7 +191,7 @@
         <repository>
             <id>github</id>
             <name>GitHub Packages</name>
-            <url>https://maven.pkg.github.com/Aethereal-Tech/bankart-gateway</url>
+            <url>https://maven.pkg.github.com/Aethereal-Tech/payments</url>
         </repository>
     </distributionManagement>
 </project>

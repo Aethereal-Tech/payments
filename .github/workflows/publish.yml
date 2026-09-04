@@ -72,8 +72,12 @@ jobs:
           last=$(git describe --tags --abbrev=0 --match 'v[0-9]*' 2>/dev/null || echo "")
           if [ -z "$last" ]; then
             # Seeded at 0.1.0, NOT the 1.0.0 this derivation was adapted from. A 1.0.0 is a promise
-            # of API stability, and this library models a documentation set with several open
-            # questions in it (see the README). 0.x says the surface may still move.
+            # of API stability, and these libraries model two documentation sets with open questions
+            # in both (see the README). 0.x says the surface may still move — which it did: v0.1.0
+            # was `bankart-gateway`, a single artifact, and v0.2.0 is the three-artifact reactor at
+            # different coordinates. Under 0.x that is a `feat:`, not a breaking change, so the
+            # derivation below is right without a special case; the coordinate move is stated in the
+            # release notes and the README instead.
             echo "No previous tag; seeding at v0.1.0."
             echo "version=0.1.0" >> "$GITHUB_OUTPUT"
             echo "release=true" >> "$GITHUB_OUTPUT"
@@ -140,10 +144,16 @@ jobs:
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
 
-      # The version is stamped into the build rather than committed. Keeping pom.xml on a SNAPSHOT
+      # The version is stamped into the build rather than committed. Keeping the poms on a SNAPSHOT
       # means no version-bump commit, no merge conflicts over a number, and one source of truth: the
       # tag. `-DskipTests` because the verify job already ran them against this exact commit.
-      - name: Publish to GitHub Packages
+      #
+      # `-DprocessAllModules=true` because this is a reactor: without it only the root pom moves and
+      # the three modules keep naming a parent version that no longer exists. One `deploy` publishes
+      # the parent pom and all three jars at the same number, which is the whole point of them
+      # sharing a release — a consumer cannot resolve payments-core:0.3.0 against
+      # payments-bankart:0.2.0 and meet the mismatch as a NoSuchMethodError at the first webhook.
+      - name: Set the release version and deploy to GitHub Packages
         if: steps.version.outputs.release == 'true'
         env:
           VERSION: ${{ steps.version.outputs.version }}
@@ -151,10 +161,11 @@ jobs:
           MAVEN_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          ./mvnw --batch-mode versions:set -DnewVersion="$VERSION" -DgenerateBackupPoms=false
+          ./mvnw --batch-mode versions:set \
+            -DnewVersion="$VERSION" -DprocessAllModules=true -DgenerateBackupPoms=false
           ./mvnw --batch-mode -DskipTests deploy
 
-      - name: Tag and release
+      - name: Tag and publish the release
         if: steps.version.outputs.release == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
@@ -166,15 +177,12 @@ jobs:
           {
             echo "Built from \`$(git rev-parse --short HEAD)\`, which passed CI in full."
             echo
-            echo '```xml'
-            echo '<dependency>'
-            echo '    <groupId>net.aetherealtech</groupId>'
-            echo '    <artifactId>bankart-gateway</artifactId>'
-            echo "    <version>${VERSION}</version>"
-            echo '</dependency>'
-            echo '```'
+            echo "Maven, on GitHub Packages — see the README's \"Install\" section. This is a PRIVATE"
+            echo "repository, so a token needs access to the organization's private packages."
             echo
-            echo "GitHub Packages needs a token even for public artifacts — see the README for the settings.xml."
+            echo "- \`net.aetherealtech:payments-core:${VERSION}\` — the provider-neutral SPI, the events and the recording test double. No runtime dependencies."
+            echo "- \`net.aetherealtech:payments-bankart:${VERSION}\` — the Bankart (IXOPAY) Transaction API v3 client and its adapter. One runtime dependency: Jackson."
+            echo "- \`net.aetherealtech:payments-agentaos:${VERSION}\` — the AgentaOS client and its adapter. No runtime dependencies."
             echo
             if [ -n "${PREVIOUS:-}" ]; then
               echo "### Changes since ${PREVIOUS}"
@@ -186,5 +194,4 @@ jobs:
           gh release create "v${VERSION}" \
             --title "v${VERSION}" \
             --notes-file "$notes" \
-            --target "$(git rev-parse HEAD)" \
-            target/bankart-gateway-"${VERSION}".jar
+            --target "$(git rev-parse HEAD)"

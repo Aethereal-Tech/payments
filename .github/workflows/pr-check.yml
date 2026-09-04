@@ -34,10 +34,15 @@ jobs:
       - name: Verify
         run: ./mvnw --batch-mode clean verify
 
-      - name: Publish coverage report
+      # One artifact per module, not one merged report. A merged number would let a well-tested
+      # module carry an untested one past a floor that each module's own pom sets separately.
+      - name: Publish coverage reports
         if: always()
         uses: actions/upload-artifact@v5
         with:
-          name: jacoco-report
-          path: target/site/jacoco/
+          name: jacoco-reports
+          path: |
+            payments-core/target/site/jacoco/
+            payments-bankart/target/site/jacoco/
+            payments-agentaos/target/site/jacoco/
           if-no-files-found: warn

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>net.aetherealtech</groupId>
+        <artifactId>payments</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>payments-bankart</artifactId>
+    <packaging>jar</packaging>
+
+    <name>Aethereal Payments — Bankart</name>
+    <description>The Bankart (IXOPAY) Transaction API v3 client, and its PaymentProvider adapter.</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>net.aetherealtech</groupId>
+            <artifactId>payments-core</artifactId>
+        </dependency>
+
+        <!-- The ONE runtime dependency in this reactor, and it is confined to this module. The
+             Bankart wire format is large, deeply nested, polymorphic on `_TYPE`, and full of fields
+             whose JSON type differs between the docs' own examples — an amount that is a string in
+             one and a number in another, a code typed as a number and sent as `"2016"`. That is what
+             a JSON library is for, and hand-writing a reader for it would be a worse dependency than
+             Jackson: an unpaid one.
+
+             A consumer already running Jackson 3 must not receive Jackson 2 from us, which is exactly
+             why this module is separate — see the root pom. FUTURE: replace it with an internal
+             reader, at which point this artifact joins the other two at zero. -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.wiremock</groupId>
+            <artifactId>wiremock</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals><goal>prepare-agent</goal></goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>verify</phase>
+                        <goals><goal>report</goal></goals>
+                    </execution>
+                    <execution>
+                        <id>check</id>
+                        <phase>verify</phase>
+                        <goals><goal>check</goal></goals>
+                        <configuration>
+                            <rules>
+                                <rule>
+                                    <element>BUNDLE</element>
+                                    <!-- ANT-style over the .class file PATH: '/' separators, never
+                                         '.'. A pattern that matches nothing makes the ratio check
+                                         pass vacuously at any real coverage. -->
+                                    <includes>
+                                        <include>net/aetherealtech/payments/bankart/*</include>
+                                        <include>net/aetherealtech/payments/bankart/model/*</include>
+                                        <include>net/aetherealtech/payments/bankart/notification/*</include>
+                                        <include>net/aetherealtech/payments/bankart/signing/*</include>
+                                        <include>net/aetherealtech/payments/bankart/internal/*</include>
+                                        <include>net/aetherealtech/payments/bankart/exception/*</include>
+                                    </includes>
+                                    <limits>
+                                        <limit>
+                                            <counter>LINE</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.90</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>BRANCH</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.80</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

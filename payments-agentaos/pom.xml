@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>net.aetherealtech</groupId>
+        <artifactId>payments</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>payments-agentaos</artifactId>
+    <packaging>jar</packaging>
+
+    <name>Aethereal Payments — AgentaOS</name>
+    <description>The AgentaOS gateway client, and its PaymentProvider adapter. No runtime dependencies.</description>
+
+    <!-- ZERO runtime dependencies, deliberately, and this is the module where that costs something:
+         it means an internal JSON reader rather than Jackson. It is worth it because a known consumer
+         of this adapter runs Jackson 3, where a transitive Jackson 2 is not a conflict Maven can
+         mediate — the two have different coordinates and different package names, so both land on the
+         classpath and the wrong one is chosen by whichever code imports which. The documents this
+         adapter parses are the gateway's own, small and flat; `internal.Json` handles them and nothing
+         else, and is not offered as API. -->
+    <dependencies>
+        <dependency>
+            <groupId>net.aetherealtech</groupId>
+            <artifactId>payments-core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.wiremock</groupId>
+            <artifactId>wiremock</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals><goal>prepare-agent</goal></goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>verify</phase>
+                        <goals><goal>report</goal></goals>
+                    </execution>
+                    <execution>
+                        <id>check</id>
+                        <phase>verify</phase>
+                        <goals><goal>check</goal></goals>
+                        <configuration>
+                            <rules>
+                                <rule>
+                                    <element>BUNDLE</element>
+                                    <includes>
+                                        <include>net/aetherealtech/payments/agentaos/*</include>
+                                        <include>net/aetherealtech/payments/agentaos/model/*</include>
+                                        <include>net/aetherealtech/payments/agentaos/internal/*</include>
+                                        <include>net/aetherealtech/payments/agentaos/exception/*</include>
+                                    </includes>
+                                    <limits>
+                                        <limit>
+                                            <counter>LINE</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.90</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>BRANCH</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.80</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
