@@ -1,4 +1,4 @@
-package net.aetherealtech.bankart;
+package net.aetherealtech.payments.bankart;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
@@ -16,15 +16,15 @@ import org.junit.jupiter.api.Test;
 
 import com.github.tomakehurst.wiremock.http.Fault;
 
-import net.aetherealtech.bankart.exception.BankartApiException;
-import net.aetherealtech.bankart.exception.BankartException;
-import net.aetherealtech.bankart.exception.BankartTransactionException;
-import net.aetherealtech.bankart.exception.BankartTransportException;
-import net.aetherealtech.bankart.model.PaymentRequest;
-import net.aetherealtech.bankart.model.ReturnType;
-import net.aetherealtech.bankart.model.StatusResponse;
-import net.aetherealtech.bankart.model.TransactionResponse;
-import net.aetherealtech.bankart.model.TransactionType;
+import net.aetherealtech.payments.bankart.exception.BankartApiException;
+import net.aetherealtech.payments.bankart.exception.BankartException;
+import net.aetherealtech.payments.bankart.exception.BankartTransactionException;
+import net.aetherealtech.payments.bankart.exception.BankartTransportException;
+import net.aetherealtech.payments.bankart.model.PaymentRequest;
+import net.aetherealtech.payments.bankart.model.ReturnType;
+import net.aetherealtech.payments.bankart.model.StatusResponse;
+import net.aetherealtech.payments.bankart.model.TransactionResponse;
+import net.aetherealtech.payments.bankart.model.TransactionType;
 
 /**
  * The line this class holds is that a declined card and a broken integration are different events.
@@ -184,7 +184,7 @@ class BankartClientErrorsTest extends GatewayTestBase {
         assertThat(status.amount()).isEqualByComparingTo("9.99");
         assertThat(status.customer().company()).isEqualTo("ACME Corp.");
         // Nested under "creditcardData" here, flat in the notifications. Both must read.
-        assertThat(status.returnData().lastFourDigits()).isEqualTo("4321");
+        assertThat(status.cardData().orElseThrow().lastFourDigits()).isEqualTo("4321");
         assertThat(status.extraData()).containsEntry("someKey", "someValue");
         assertThat(status.errors()).isEmpty();
     }
@@ -246,8 +246,8 @@ class BankartClientErrorsTest extends GatewayTestBase {
     @Test
     void transactionExceptionCarriesTheGatewaySResponse() {
         TransactionResponse response = new TransactionResponse(false, "uuid-9", "pid", ReturnType.ERROR,
-                null, null, null, null, null, "Creditcard", null, null,
-                java.util.List.of(new net.aetherealtech.bankart.model.TransactionError(
+                null, null, null, null, null, "Creditcard", null, null, null,
+                java.util.List.of(new net.aetherealtech.payments.bankart.model.TransactionError(
                         "Stolen card", 2016, "declined", "05")));
 
         BankartTransactionException exception = new BankartTransactionException(response);
@@ -264,7 +264,7 @@ class BankartClientErrorsTest extends GatewayTestBase {
     @DisplayName("an ERROR with no errors array still produces a usable message")
     void transactionExceptionWithoutDetail() {
         TransactionResponse response = new TransactionResponse(false, "uuid-9", "pid", ReturnType.ERROR,
-                null, null, null, null, null, null, null, null, null);
+                null, null, null, null, null, null, null, null, null, null);
 
         assertThat(new BankartTransactionException(response).getMessage())
                 .contains("uuid-9")

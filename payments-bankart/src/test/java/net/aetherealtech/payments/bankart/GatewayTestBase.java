@@ -1,4 +1,4 @@
-package net.aetherealtech.bankart;
+package net.aetherealtech.payments.bankart;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
@@ -15,7 +15,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 
-import net.aetherealtech.bankart.signing.HmacSigner;
+import net.aetherealtech.payments.bankart.signing.HmacSigner;
 
 /**
  * A client pointed at a local stub of the gateway.

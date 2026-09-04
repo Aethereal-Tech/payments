@@ -1,10 +1,10 @@
-package net.aetherealtech.bankart.exception;
+package net.aetherealtech.payments.bankart.exception;
 
 import java.util.List;
 import java.util.Optional;
 
-import net.aetherealtech.bankart.model.TransactionError;
-import net.aetherealtech.bankart.model.TransactionResponse;
+import net.aetherealtech.payments.bankart.model.TransactionError;
+import net.aetherealtech.payments.bankart.model.TransactionResponse;
 
 /**
  * The gateway accepted the request and answered {@code returnType = ERROR}: a transaction that

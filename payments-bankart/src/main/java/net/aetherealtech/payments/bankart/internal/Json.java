@@ -1,4 +1,4 @@
-package net.aetherealtech.bankart.internal;
+package net.aetherealtech.payments.bankart.internal;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;

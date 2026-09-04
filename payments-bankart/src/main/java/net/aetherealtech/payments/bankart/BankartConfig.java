@@ -1,4 +1,4 @@
-package net.aetherealtech.bankart;
+package net.aetherealtech.payments.bankart;
 
 import java.net.URI;
 import java.time.Duration;

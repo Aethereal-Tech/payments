@@ -1,4 +1,4 @@
-package net.aetherealtech.bankart.model;
+package net.aetherealtech.payments.bankart.model;
 
 import java.math.BigDecimal;
 import java.util.Map;

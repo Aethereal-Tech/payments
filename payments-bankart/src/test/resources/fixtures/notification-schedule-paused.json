@@ -1,0 +1,10 @@
+{
+  "result": "OK",
+  "uuid": "cdefa34567cdefa34569",
+  "merchantTransactionId": "2019-09-02-0023",
+  "transactionType": "DEBIT",
+  "scheduleData": {
+    "scheduleId": "SC-1234-1234-1234-1234-1234-1234",
+    "scheduleStatus": "PAUSED"
+  }
+}

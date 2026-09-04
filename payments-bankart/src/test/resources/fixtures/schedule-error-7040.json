@@ -1,0 +1,5 @@
+{
+  "success": false,
+  "errorMessage": "The scheduleId is not valid or does not match to the connector",
+  "errorCode": 7040
+}

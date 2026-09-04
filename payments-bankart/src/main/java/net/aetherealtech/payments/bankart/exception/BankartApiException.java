@@ -1,4 +1,4 @@
-package net.aetherealtech.bankart.exception;
+package net.aetherealtech.payments.bankart.exception;
 
 /**
  * A general gateway error: the request itself was refused rather than a payment declined.

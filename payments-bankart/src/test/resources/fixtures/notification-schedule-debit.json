@@ -1,0 +1,16 @@
+{
+  "result": "OK",
+  "uuid": "cdefa34567cdefa34567",
+  "merchantTransactionId": "2019-09-02-0021",
+  "purchaseId": "20190927-cdefa34567cdefa34567",
+  "transactionType": "DEBIT",
+  "paymentMethod": "Creditcard",
+  "amount": "9.99",
+  "currency": "EUR",
+  "scheduleData": {
+    "scheduleId": "SC-1234-1234-1234-1234-1234-1234",
+    "scheduleStatus": "ACTIVE",
+    "scheduledAt": "2019-10-30T12:00:00+00:00",
+    "merchantMetaData": "merchantRelevantData"
+  }
+}

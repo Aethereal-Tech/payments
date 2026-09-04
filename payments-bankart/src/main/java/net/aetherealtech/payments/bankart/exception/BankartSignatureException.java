@@ -1,4 +1,4 @@
-package net.aetherealtech.bankart.exception;
+package net.aetherealtech.payments.bankart.exception;
 
 /**
  * An inbound notification did not authenticate: the signature failed to match, or its {@code Date}

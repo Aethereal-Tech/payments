@@ -1,4 +1,4 @@
-package net.aetherealtech.bankart.model;
+package net.aetherealtech.payments.bankart.model;
 
 import java.math.BigDecimal;
 import java.util.Map;
@@ -27,7 +27,8 @@ public record PayoutRequest(
         String merchantMetaData,
         String callbackUrl,
         String description,
-        Customer customer) {
+        Customer customer,
+        PayByLink payByLink) {
 
     public PayoutRequest {
         PaymentRequest.requireText(merchantTransactionId, "merchantTransactionId");
@@ -42,6 +43,6 @@ public record PayoutRequest(
     }
 
     public static PayoutRequest toReference(String merchantTransactionId, String referenceUuid, BigDecimal amount, String currency) {
-        return new PayoutRequest(merchantTransactionId, amount, currency, referenceUuid, null, null, null, null, null, null, null, null);
+        return new PayoutRequest(merchantTransactionId, amount, currency, referenceUuid, null, null, null, null, null, null, null, null, null);
     }
 }

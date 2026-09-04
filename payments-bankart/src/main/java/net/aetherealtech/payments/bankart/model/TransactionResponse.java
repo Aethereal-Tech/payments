@@ -1,4 +1,4 @@
-package net.aetherealtech.bankart.model;
+package net.aetherealtech.payments.bankart.model;
 
 import java.util.List;
 import java.util.Map;
@@ -16,8 +16,9 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
  * <p>For a redirect flow this is not the outcome. The docs are emphatic: "For the final result you
  * should only trust the notification, NOT the back redirection."
  *
- * @param extraData string-to-string pairs; {@code remainingAmount} appears here after a partial
- *                  capture or refund
+ * @param extraData    string-to-string pairs; {@code remainingAmount} appears here after a partial
+ *                     capture or refund
+ * @param scheduleData present when the request started a schedule, or when this charge belongs to one
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record TransactionResponse(
@@ -31,12 +32,18 @@ public record TransactionResponse(
         String htmlContent,
         String paymentDescriptor,
         String paymentMethod,
-        @JsonDeserialize(using = CardDataDeserializer.class) CardData returnData,
+        @JsonDeserialize(using = ReturnDataDeserializer.class) ReturnData returnData,
+        ScheduleData scheduleData,
         Map<String, Object> extraData,
         List<TransactionError> errors) {
 
     public TransactionResponse {
         errors = errors == null ? List.of() : List.copyOf(errors);
+    }
+
+    /** The instrument as a card, when that is what it was. Empty for iban, phone, wallet or nothing. */
+    public Optional<CardData> cardData() {
+        return returnData instanceof CardData card ? Optional.of(card) : Optional.empty();
     }
 
     public boolean isError() {

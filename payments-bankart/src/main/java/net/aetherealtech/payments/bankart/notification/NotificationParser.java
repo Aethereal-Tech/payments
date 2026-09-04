@@ -1,12 +1,12 @@
-package net.aetherealtech.bankart.notification;
+package net.aetherealtech.payments.bankart.notification;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import net.aetherealtech.bankart.exception.BankartNotificationException;
-import net.aetherealtech.bankart.internal.Json;
+import net.aetherealtech.payments.bankart.exception.BankartNotificationException;
+import net.aetherealtech.payments.bankart.internal.Json;
 
 /**
  * Turns a callback body into a {@link Notification}.

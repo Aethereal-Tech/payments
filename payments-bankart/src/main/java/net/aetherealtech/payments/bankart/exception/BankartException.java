@@ -1,4 +1,4 @@
-package net.aetherealtech.bankart.exception;
+package net.aetherealtech.payments.bankart.exception;
 
 /**
  * Base of every failure this library raises.

@@ -1,4 +1,4 @@
-package net.aetherealtech.bankart.model;
+package net.aetherealtech.payments.bankart.model;
 
 import java.util.Map;
 
@@ -25,6 +25,8 @@ public record RegisterRequest(
         String description,
         Customer customer,
         ThreeDSecureData threeDSecureData,
+        Schedule schedule,
+        PayByLink payByLink,
         String language) {
 
     public RegisterRequest {
@@ -49,6 +51,8 @@ public record RegisterRequest(
         private String description;
         private Customer customer;
         private ThreeDSecureData threeDSecureData;
+        private Schedule schedule;
+        private PayByLink payByLink;
         private String language;
 
         private Builder(String merchantTransactionId) {
@@ -67,6 +71,8 @@ public record RegisterRequest(
         public Builder description(String v) { this.description = v; return this; }
         public Builder customer(Customer v) { this.customer = v; return this; }
         public Builder threeDSecureData(ThreeDSecureData v) { this.threeDSecureData = v; return this; }
+        public Builder schedule(Schedule v) { this.schedule = v; return this; }
+        public Builder payByLink(PayByLink v) { this.payByLink = v; return this; }
         public Builder language(String v) { this.language = v; return this; }
 
         public Builder redirectUrls(String successUrl, String cancelUrl, String errorUrl, String callbackUrl) {
@@ -80,7 +86,7 @@ public record RegisterRequest(
         public RegisterRequest build() {
             return new RegisterRequest(merchantTransactionId, additionalId1, additionalId2, extraData,
                     merchantMetaData, successUrl, cancelUrl, errorUrl, callbackUrl, transactionToken,
-                    description, customer, threeDSecureData, language);
+                    description, customer, threeDSecureData, schedule, payByLink, language);
         }
     }
 }

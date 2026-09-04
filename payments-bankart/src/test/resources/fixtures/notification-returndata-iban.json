@@ -1,0 +1,20 @@
+{
+  "result": "OK",
+  "uuid": "abcde12345abcde12346",
+  "merchantTransactionId": "2019-09-02-0030",
+  "transactionType": "DEBIT",
+  "paymentMethod": "DirectDebit",
+  "amount": "9.99",
+  "currency": "EUR",
+  "returnData": {
+    "_TYPE": "ibanData",
+    "accountOwner": "John Doe",
+    "iban": "AT123456789012345678",
+    "bic": "ABCDATWW",
+    "mandateId": "1234",
+    "mandateDate": "2019-09-29",
+    "bankName": "Example Bank",
+    "bankBranchName": "Vienna",
+    "country": "AT"
+  }
+}

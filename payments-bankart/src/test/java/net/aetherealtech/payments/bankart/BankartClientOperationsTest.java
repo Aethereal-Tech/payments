@@ -1,4 +1,4 @@
-package net.aetherealtech.bankart;
+package net.aetherealtech.payments.bankart;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -13,19 +13,19 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 
-import net.aetherealtech.bankart.model.CaptureRequest;
-import net.aetherealtech.bankart.model.Customer;
-import net.aetherealtech.bankart.model.DeregisterRequest;
-import net.aetherealtech.bankart.model.PaymentRequest;
-import net.aetherealtech.bankart.model.PayoutRequest;
-import net.aetherealtech.bankart.model.RefundRequest;
-import net.aetherealtech.bankart.model.RegisterRequest;
-import net.aetherealtech.bankart.model.ReturnType;
-import net.aetherealtech.bankart.model.ThreeDSecureData;
-import net.aetherealtech.bankart.model.ThreeDSecureMode;
-import net.aetherealtech.bankart.model.TokenType;
-import net.aetherealtech.bankart.model.TransactionResponse;
-import net.aetherealtech.bankart.model.VoidRequest;
+import net.aetherealtech.payments.bankart.model.CaptureRequest;
+import net.aetherealtech.payments.bankart.model.Customer;
+import net.aetherealtech.payments.bankart.model.DeregisterRequest;
+import net.aetherealtech.payments.bankart.model.PaymentRequest;
+import net.aetherealtech.payments.bankart.model.PayoutRequest;
+import net.aetherealtech.payments.bankart.model.RefundRequest;
+import net.aetherealtech.payments.bankart.model.RegisterRequest;
+import net.aetherealtech.payments.bankart.model.ReturnType;
+import net.aetherealtech.payments.bankart.model.ThreeDSecureData;
+import net.aetherealtech.payments.bankart.model.ThreeDSecureMode;
+import net.aetherealtech.payments.bankart.model.TokenType;
+import net.aetherealtech.payments.bankart.model.TransactionResponse;
+import net.aetherealtech.payments.bankart.model.VoidRequest;
 
 /** One test per documented operation, asserting the request the docs describe and parsing their response. */
 class BankartClientOperationsTest extends GatewayTestBase {
@@ -229,7 +229,7 @@ class BankartClientOperationsTest extends GatewayTestBase {
 
         client().debit(PaymentRequest.builder("2019-09-02-0009", new BigDecimal("9.99"), "EUR")
                 .referenceUuid("abcde12345abcde12345")
-                .transactionIndicator(net.aetherealtech.bankart.model.TransactionIndicator.RECURRING)
+                .transactionIndicator(net.aetherealtech.payments.bankart.model.TransactionIndicator.RECURRING)
                 .build());
 
         JsonNode body = mapper.readTree(onlyRequest().getBodyAsString());
@@ -285,7 +285,7 @@ class BankartClientOperationsTest extends GatewayTestBase {
         TransactionResponse response = client().debit(
                 PaymentRequest.builder("tx", new BigDecimal("1.00"), "EUR").build());
 
-        assertThat(response.returnData().lastFourDigits()).isEqualTo("1111");
-        assertThat(response.returnData().fingerprint()).isEqualTo("9s92FBBvMuw7nn8t");
+        assertThat(response.cardData().orElseThrow().lastFourDigits()).isEqualTo("1111");
+        assertThat(response.cardData().orElseThrow().fingerprint()).isEqualTo("9s92FBBvMuw7nn8t");
     }
 }

@@ -1,4 +1,4 @@
-package net.aetherealtech.bankart.signing;
+package net.aetherealtech.payments.bankart.signing;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;

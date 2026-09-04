@@ -1,4 +1,4 @@
-package net.aetherealtech.bankart;
+package net.aetherealtech.payments.bankart;
 
 import java.io.IOException;
 import java.net.URI;
@@ -13,22 +13,29 @@ import java.util.Objects;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import net.aetherealtech.bankart.exception.BankartApiException;
-import net.aetherealtech.bankart.exception.BankartException;
-import net.aetherealtech.bankart.exception.BankartTransactionException;
-import net.aetherealtech.bankart.exception.BankartTransportException;
-import net.aetherealtech.bankart.internal.Json;
-import net.aetherealtech.bankart.model.CaptureRequest;
-import net.aetherealtech.bankart.model.DeregisterRequest;
-import net.aetherealtech.bankart.model.PaymentRequest;
-import net.aetherealtech.bankart.model.PayoutRequest;
-import net.aetherealtech.bankart.model.RedirectResult;
-import net.aetherealtech.bankart.model.RefundRequest;
-import net.aetherealtech.bankart.model.RegisterRequest;
-import net.aetherealtech.bankart.model.StatusResponse;
-import net.aetherealtech.bankart.model.TransactionResponse;
-import net.aetherealtech.bankart.model.VoidRequest;
-import net.aetherealtech.bankart.signing.HmacSigner;
+import net.aetherealtech.payments.bankart.exception.BankartApiException;
+import net.aetherealtech.payments.bankart.exception.BankartException;
+import net.aetherealtech.payments.bankart.exception.BankartTransactionException;
+import net.aetherealtech.payments.bankart.exception.BankartTransportException;
+import net.aetherealtech.payments.bankart.internal.Json;
+import net.aetherealtech.payments.bankart.model.CaptureRequest;
+import net.aetherealtech.payments.bankart.model.ContinueScheduleRequest;
+import net.aetherealtech.payments.bankart.model.DeregisterRequest;
+import net.aetherealtech.payments.bankart.model.IncrementalAuthorizationRequest;
+import net.aetherealtech.payments.bankart.model.OptionsRequest;
+import net.aetherealtech.payments.bankart.model.OptionsResponse;
+import net.aetherealtech.payments.bankart.model.PaymentRequest;
+import net.aetherealtech.payments.bankart.model.PayoutRequest;
+import net.aetherealtech.payments.bankart.model.RedirectResult;
+import net.aetherealtech.payments.bankart.model.RefundRequest;
+import net.aetherealtech.payments.bankart.model.RegisterRequest;
+import net.aetherealtech.payments.bankart.model.ScheduleResponse;
+import net.aetherealtech.payments.bankart.model.StartScheduleRequest;
+import net.aetherealtech.payments.bankart.model.StatusResponse;
+import net.aetherealtech.payments.bankart.model.TransactionResponse;
+import net.aetherealtech.payments.bankart.model.UpdateScheduleRequest;
+import net.aetherealtech.payments.bankart.model.VoidRequest;
+import net.aetherealtech.payments.bankart.signing.HmacSigner;
 
 /**
  * A client for one Bankart gateway connector.
@@ -46,6 +53,13 @@ import net.aetherealtech.bankart.signing.HmacSigner;
 public final class BankartClient {
 
     private static final String CONTENT_TYPE = "application/json; charset=utf-8";
+
+    /**
+     * Pause and cancel declare a request body whose schema permits no properties at all
+     * ({@code maxProperties: 0}), and mark it required. An empty object is the only body that
+     * satisfies both; sending no body would fail the "required" half.
+     */
+    private static final String EMPTY_BODY = "{}";
 
     private final BankartConfig config;
     private final HttpClient httpClient;
@@ -109,6 +123,77 @@ public final class BankartClient {
         return transaction("payout", request);
     }
 
+    /**
+     * Raises or prolongs an authorization taken earlier by {@link #preauthorize}.
+     *
+     * <p>The request's amount is the increment, not the new total.
+     */
+    public TransactionResponse incrementalAuthorization(IncrementalAuthorizationRequest request) {
+        return transaction("incrementalAuthorization", request);
+    }
+
+    // ---------------------------------------------------------------- schedules
+
+    /**
+     * Starts a schedule against an instrument registered by an earlier register,
+     * debit-with-register or preauthorize-with-register.
+     *
+     * <p>The alternative is to start it inline, by attaching a
+     * {@link net.aetherealtech.payments.bankart.model.Schedule} to that transaction in the first
+     * place.
+     */
+    public ScheduleResponse startSchedule(StartScheduleRequest request) {
+        return schedule("/schedule/" + config.apiKey() + "/start", serialize(request));
+    }
+
+    /** Changes a running schedule in place — price, cadence or registration. */
+    public ScheduleResponse updateSchedule(String scheduleId, UpdateScheduleRequest request) {
+        return schedule(schedulePath(scheduleId, "update"), serialize(request));
+    }
+
+    /** The schedule as the gateway sees it now, which is how a subscription is reconciled. */
+    public ScheduleResponse showSchedule(String scheduleId) {
+        URI uri = resolve(schedulePath(scheduleId, "get"));
+        return convert(send(get(uri), uri), ScheduleResponse.class);
+    }
+
+    /** Stops billing without ending the schedule; {@link #continueSchedule} resumes it. */
+    public ScheduleResponse pauseSchedule(String scheduleId) {
+        return schedule(schedulePath(scheduleId, "pause"), EMPTY_BODY);
+    }
+
+    /** Resumes a paused schedule on the date the request names. */
+    public ScheduleResponse continueSchedule(String scheduleId, ContinueScheduleRequest request) {
+        return schedule(schedulePath(scheduleId, "continue"), serialize(request));
+    }
+
+    /**
+     * Ends a schedule.
+     *
+     * <p>It takes effect at once and there is no deferred form: no field anywhere in the API asks
+     * for a cancellation at the end of the paid period.
+     */
+    public ScheduleResponse cancelSchedule(String scheduleId) {
+        return schedule(schedulePath(scheduleId, "cancel"), EMPTY_BODY);
+    }
+
+    // ---------------------------------------------------------------- options
+
+    /**
+     * An adapter's published list — the banks behind an online-banking method, typically.
+     *
+     * <p>{@code optionsName} is a path segment rather than a body field: it names the adapter's list,
+     * and the request body carries only that adapter's own parameters.
+     *
+     * <p>This is the one operation in the API that requires no authentication. Basic auth and the
+     * signature are sent anyway, since a gateway that ignores credentials it did not ask for costs
+     * nothing and one connector's configuration is not a reason to build a second request path.
+     */
+    public OptionsResponse options(String optionsName, OptionsRequest request) {
+        URI uri = resolve("/options/" + config.apiKey() + "/" + encodePathSegment(optionsName));
+        return convert(send(post(uri, serialize(request)), uri), OptionsResponse.class);
+    }
+
     // ---------------------------------------------------------------- checkout
 
     /**
@@ -147,11 +232,23 @@ public final class BankartClient {
     /**
      * The recovery path after a timeout: a transaction may exist even though no response reached
      * you, and this settles it without risking a second charge.
+     *
+     * <p><strong>Rate limited to 5 requests per minute per {@code uuid}</strong>, after which the
+     * gateway answers HTTP 429 — so this is a recovery path and not a polling loop. Budget the five
+     * for the cases that matter: a timed-out call, a customer asking, an operator investigating.
      */
     public StatusResponse statusByUuid(String uuid) {
         return status("getByUuid", uuid);
     }
 
+    /**
+     * The same lookup, keyed on the identifier YOU chose — which is what makes it usable after a
+     * timeout, when no gateway UUID ever reached you.
+     *
+     * <p><strong>Rate limited to 5 requests per minute per {@code merchantTransactionId}</strong>,
+     * after which the gateway answers HTTP 429. The budget is per identifier, so retrying the same
+     * lookup in a tight loop exhausts it for that one transaction and nothing else.
+     */
     public StatusResponse statusByMerchantTransactionId(String merchantTransactionId) {
         return status("getByMerchantTransactionId", merchantTransactionId);
     }
@@ -171,6 +268,22 @@ public final class BankartClient {
         JsonNode json = send(get(uri), uri);
         raiseIfGeneralError(json);
         return convert(json, StatusResponse.class);
+    }
+
+    /**
+     * A schedule failure is NOT raised as a general error, unlike a transaction's. Its documented
+     * failure body is a {@code ScheduleResponse} carrying {@code oldStatus} and {@code newStatus}
+     * alongside the code — "the status of the schedule is not valid for the requested operation"
+     * (7070) is only actionable if the caller can see what the status actually is, and throwing
+     * would discard exactly that.
+     */
+    private ScheduleResponse schedule(String path, String body) {
+        URI uri = resolve(path);
+        return convert(send(post(uri, body), uri), ScheduleResponse.class);
+    }
+
+    private String schedulePath(String scheduleId, String operation) {
+        return "/schedule/" + config.apiKey() + "/" + encodePathSegment(scheduleId) + "/" + operation;
     }
 
     private HttpRequest post(URI uri, String body) {

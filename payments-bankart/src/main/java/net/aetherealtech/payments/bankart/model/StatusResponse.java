@@ -1,8 +1,9 @@
-package net.aetherealtech.bankart.model;
+package net.aetherealtech.payments.bankart.model;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -17,6 +18,11 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
  * <p>{@code success} reports whether the <em>lookup</em> worked; {@code transactionStatus} reports
  * what happened to the money. A found-but-failed transaction is {@code success = true} with
  * {@code transactionStatus = ERROR}.
+ *
+ * @param schedules the schedules this transaction belongs to, keyed by the gateway. A map rather
+ *                  than the single {@code scheduleData} a transaction response and a notification
+ *                  carry; the specification gives no meaning for the keys, so they are passed
+ *                  through untouched.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record StatusResponse(
@@ -31,12 +37,20 @@ public record StatusResponse(
         BigDecimal amount,
         String currency,
         Customer customer,
-        @JsonDeserialize(using = CardDataDeserializer.class) CardData returnData,
+        @JsonDeserialize(using = ReturnDataDeserializer.class) ReturnData returnData,
+        Map<String, ScheduleData> schedules,
+        PayByLinkData payByLinkData,
         Map<String, Object> extraData,
         String merchantMetaData,
         List<StatusError> errors) {
 
     public StatusResponse {
         errors = errors == null ? List.of() : List.copyOf(errors);
+        schedules = schedules == null ? Map.of() : Map.copyOf(schedules);
+    }
+
+    /** The instrument as a card, when that is what it was. Empty for iban, phone, wallet or nothing. */
+    public Optional<CardData> cardData() {
+        return returnData instanceof CardData card ? Optional.of(card) : Optional.empty();
     }
 }

@@ -1,4 +1,4 @@
-package net.aetherealtech.bankart.model;
+package net.aetherealtech.payments.bankart.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -8,6 +8,10 @@ import com.fasterxml.jackson.annotation.JsonValue;
  *
  * <p>Matched case-insensitively: the status API's own examples show both {@code "debit"} and
  * {@code "DEBIT"} for the same field.
+ *
+ * <p>The last three exist in the OpenAPI enum but not in the prose documentation's callback table,
+ * which stops at {@code PAYOUT}. They are modelled from the machine-readable source, since a value
+ * that arrives and degrades to {@link #UNKNOWN} is a callback nobody can act on.
  */
 public enum TransactionType {
 
@@ -21,6 +25,9 @@ public enum TransactionType {
     DEREGISTER("DEREGISTER"),
     CHARGEBACK("CHARGEBACK"),
     CHARGEBACK_REVERSAL("CHARGEBACK-REVERSAL"),
+    INCREMENTAL_AUTHORIZATION("INCREMENTAL-AUTHORIZATION"),
+    DISPUTE("DISPUTE"),
+    DISPUTE_REVERSAL("DISPUTE-REVERSAL"),
     UNKNOWN("");
 
     private final String wire;

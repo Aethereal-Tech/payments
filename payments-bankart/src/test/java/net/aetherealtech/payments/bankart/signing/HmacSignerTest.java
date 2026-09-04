@@ -1,4 +1,4 @@
-package net.aetherealtech.bankart.signing;
+package net.aetherealtech.payments.bankart.signing;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -60,6 +60,37 @@ class HmacSignerTest {
                 .isNotEqualTo(BODY_SHA512);
     }
 
+    /**
+     * The header carries the signature and nothing else.
+     *
+     * <p>Worth pinning because the alternative is plausible and wrong. Several gateways in this
+     * family put an identifier in front of the signature — {@code Gateway <API_KEY>:<BASE64>} — and a
+     * reader who has met one of those would recognise the pattern here. Bankart does not.
+     *
+     * <p>The OpenAPI specification cannot settle it: a case-insensitive search of the whole document
+     * for "signature" returns nothing, and its only {@code securityScheme} is {@code basicAuth}. What
+     * settles it is the prose API reference at
+     * {@code https://bankart.paymentsandbox.cloud/documentation/apiv3}, whose "Signature" section
+     * publishes a complete worked example and shows the header as a bare Base64 value. The API key
+     * appears in the signed URI and in no other part of this mechanism.
+     */
+    @Test
+    @DisplayName("X-Signature is a bare Base64 signature, with no Gateway prefix and no embedded API key")
+    void headerValueIsBareBase64() {
+        String signature = signer.sign("POST", body(), CONTENT_TYPE, DATE, REQUEST_URI);
+
+        assertThat(signature).isEqualTo(EXPECTED_SIGNATURE);
+        assertThat(signature).doesNotContain("Gateway").doesNotContain(":").doesNotContain("my-api-key");
+        assertThat(signature).matches("^[A-Za-z0-9+/]+={0,2}$");
+    }
+
+    /**
+     * The counterpart to {@link #documentedVector()}, and the one place the two disagree: the doc's
+     * concatenation block prints the URI literally as {@code /api/v3/transaction/{apiKey}/debit},
+     * and its published signature does not reproduce from that string. Both are pinned so that a
+     * future reader comparing this code against the doc finds the discrepancy already resolved
+     * rather than rediscovering it against a live gateway's "1004 Invalid signature".
+     */
     @Test
     @DisplayName("the signed URI carries the substituted API key, not the {apiKey} placeholder")
     void uriPlaceholderIsSubstituted() {

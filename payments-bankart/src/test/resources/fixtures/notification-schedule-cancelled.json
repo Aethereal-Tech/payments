@@ -1,0 +1,11 @@
+{
+  "result": "OK",
+  "uuid": "cdefa34567cdefa34568",
+  "merchantTransactionId": "2019-09-02-0022",
+  "transactionType": "DEBIT",
+  "message": "Schedule ended",
+  "scheduleData": {
+    "scheduleId": "SC-1234-1234-1234-1234-1234-1234",
+    "scheduleStatus": "CANCELLED"
+  }
+}

@@ -1,4 +1,4 @@
-package net.aetherealtech.bankart.model;
+package net.aetherealtech.payments.bankart.model;
 
 import java.math.BigDecimal;
 import java.util.Map;
@@ -12,7 +12,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
  *
  * <p>One record serves both because the documented field lists are identical but for
  * {@code captureInMinutes}, which preauthorize alone accepts —
- * {@link net.aetherealtech.bankart.BankartClient#debit} rejects a request that sets it rather than
+ * {@link net.aetherealtech.payments.bankart.BankartClient#debit} rejects a request that sets it rather than
  * quietly sending a field the endpoint does not take.
  *
  * <p>Set {@code transactionToken} for a payment.js-tokenised card, {@code referenceUuid} for a
@@ -40,6 +40,8 @@ public record PaymentRequest(
         TransactionIndicator transactionIndicator,
         Customer customer,
         ThreeDSecureData threeDSecureData,
+        Schedule schedule,
+        PayByLink payByLink,
         String language,
         Boolean includeTracing) {
 
@@ -82,6 +84,8 @@ public record PaymentRequest(
         private TransactionIndicator transactionIndicator;
         private Customer customer;
         private ThreeDSecureData threeDSecureData;
+        private Schedule schedule;
+        private PayByLink payByLink;
         private String language;
         private Boolean includeTracing;
 
@@ -108,6 +112,8 @@ public record PaymentRequest(
         public Builder transactionIndicator(TransactionIndicator v) { this.transactionIndicator = v; return this; }
         public Builder customer(Customer v) { this.customer = v; return this; }
         public Builder threeDSecureData(ThreeDSecureData v) { this.threeDSecureData = v; return this; }
+        public Builder schedule(Schedule v) { this.schedule = v; return this; }
+        public Builder payByLink(PayByLink v) { this.payByLink = v; return this; }
         public Builder language(String v) { this.language = v; return this; }
         public Builder includeTracing(Boolean v) { this.includeTracing = v; return this; }
 
@@ -124,7 +130,7 @@ public record PaymentRequest(
             return new PaymentRequest(merchantTransactionId, amount, currency, surchargeAmount, captureInMinutes,
                     additionalId1, additionalId2, extraData, merchantMetaData, referenceUuid, successUrl, cancelUrl,
                     errorUrl, callbackUrl, transactionToken, description, withRegister, transactionIndicator,
-                    customer, threeDSecureData, language, includeTracing);
+                    customer, threeDSecureData, schedule, payByLink, language, includeTracing);
         }
     }
 }

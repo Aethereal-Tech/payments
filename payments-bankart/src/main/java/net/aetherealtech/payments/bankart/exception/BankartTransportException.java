@@ -1,4 +1,4 @@
-package net.aetherealtech.bankart.exception;
+package net.aetherealtech.payments.bankart.exception;
 
 /**
  * The request never produced a gateway verdict — connection failure, timeout, or interruption.

@@ -1,0 +1,13 @@
+{
+  "result": "OK",
+  "uuid": "abcde12345abcde12348",
+  "merchantTransactionId": "2019-09-02-0032",
+  "transactionType": "DEBIT",
+  "paymentMethod": "PayPal",
+  "returnData": {
+    "_TYPE": "walletData",
+    "walletReferenceId": "WAL-0001",
+    "walletOwner": "John Doe",
+    "walletType": "PayPal"
+  }
+}

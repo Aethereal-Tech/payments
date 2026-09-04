@@ -1,4 +1,4 @@
-package net.aetherealtech.bankart.model;
+package net.aetherealtech.payments.bankart.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 

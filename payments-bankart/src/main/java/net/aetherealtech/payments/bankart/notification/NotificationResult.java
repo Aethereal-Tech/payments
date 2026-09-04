@@ -1,4 +1,4 @@
-package net.aetherealtech.bankart.notification;
+package net.aetherealtech.payments.bankart.notification;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;

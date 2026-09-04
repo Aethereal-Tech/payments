@@ -1,4 +1,4 @@
-package net.aetherealtech.bankart;
+package net.aetherealtech.payments.bankart;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -10,18 +10,18 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import net.aetherealtech.bankart.exception.BankartException;
-import net.aetherealtech.bankart.exception.BankartSignatureException;
-import net.aetherealtech.bankart.exception.BankartTransactionException;
-import net.aetherealtech.bankart.model.Customer;
-import net.aetherealtech.bankart.model.PaymentRequest;
-import net.aetherealtech.bankart.model.RedirectResult;
-import net.aetherealtech.bankart.model.RedirectType;
-import net.aetherealtech.bankart.model.RegisterRequest;
-import net.aetherealtech.bankart.notification.Notification;
-import net.aetherealtech.bankart.notification.NotificationVerifier;
-import net.aetherealtech.bankart.signing.HmacSigner;
-import net.aetherealtech.bankart.signing.SignedRequest;
+import net.aetherealtech.payments.bankart.exception.BankartException;
+import net.aetherealtech.payments.bankart.exception.BankartSignatureException;
+import net.aetherealtech.payments.bankart.exception.BankartTransactionException;
+import net.aetherealtech.payments.bankart.model.Customer;
+import net.aetherealtech.payments.bankart.model.PaymentRequest;
+import net.aetherealtech.payments.bankart.model.RedirectResult;
+import net.aetherealtech.payments.bankart.model.RedirectType;
+import net.aetherealtech.payments.bankart.model.RegisterRequest;
+import net.aetherealtech.payments.bankart.notification.Notification;
+import net.aetherealtech.payments.bankart.notification.NotificationVerifier;
+import net.aetherealtech.payments.bankart.signing.HmacSigner;
+import net.aetherealtech.payments.bankart.signing.SignedRequest;
 
 /**
  * The whole hosted-checkout round trip, end to end: start the payment, take the redirect, then

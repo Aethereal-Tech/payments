@@ -1,4 +1,4 @@
-package net.aetherealtech.bankart.model;
+package net.aetherealtech.payments.bankart.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import net.aetherealtech.bankart.internal.Json;
+import net.aetherealtech.payments.bankart.internal.Json;
 
 /** The request records reject at construction what the gateway would otherwise reject at a distance. */
 class ModelTest {
@@ -171,23 +171,23 @@ class ModelTest {
     void payoutNeedsADestination() {
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> new PayoutRequest("tx", BigDecimal.ONE, "EUR", null, null,
-                        null, null, null, null, null, null, null))
+                        null, null, null, null, null, null, null, null))
                 .withMessageContaining("referenceUuid or transactionToken");
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> new PayoutRequest("tx", BigDecimal.ONE, "EUR", " ", "  ",
-                        null, null, null, null, null, null, null));
+                        null, null, null, null, null, null, null, null));
         assertThat(PayoutRequest.toReference("tx", "ref", BigDecimal.ONE, "EUR").referenceUuid()).isEqualTo("ref");
         assertThat(new PayoutRequest("tx", BigDecimal.ONE, "EUR", null, "token",
-                null, null, null, null, null, null, null).transactionToken()).isEqualTo("token");
+                null, null, null, null, null, null, null, null).transactionToken()).isEqualTo("token");
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> new PayoutRequest("", BigDecimal.ONE, "EUR", "ref", null,
-                        null, null, null, null, null, null, null));
+                        null, null, null, null, null, null, null, null));
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> new PayoutRequest("tx", BigDecimal.ONE, "", "ref", null,
-                        null, null, null, null, null, null, null));
+                        null, null, null, null, null, null, null, null));
         assertThatNullPointerException()
                 .isThrownBy(() -> new PayoutRequest("tx", null, "EUR", "ref", null,
-                        null, null, null, null, null, null, null));
+                        null, null, null, null, null, null, null, null));
     }
 
     @Test
@@ -263,28 +263,32 @@ class ModelTest {
         String nested = "{\"success\":true,\"returnType\":\"FINISHED\",\"returnData\":"
                 + "{\"creditcardData\":{\"lastFourDigits\":\"4321\",\"binBrand\":\"VISA\"}}}";
 
-        assertThat(mapper.readValue(flat, TransactionResponse.class).returnData().lastFourDigits()).isEqualTo("1111");
+        assertThat(mapper.readValue(flat, TransactionResponse.class).cardData().orElseThrow().lastFourDigits()).isEqualTo("1111");
         TransactionResponse nestedResponse = mapper.readValue(nested, TransactionResponse.class);
-        assertThat(nestedResponse.returnData().lastFourDigits()).isEqualTo("4321");
-        assertThat(nestedResponse.returnData().type()).isEqualTo("creditcardData");
+        assertThat(nestedResponse.cardData().orElseThrow().lastFourDigits()).isEqualTo("4321");
+        assertThat(nestedResponse.cardData().orElseThrow().type()).isEqualTo("creditcardData");
     }
 
     @Test
-    void returnDataOfAnUnmodelledVariantReadsAsNullRatherThanAsAnEmptyCard() throws Exception {
-        String iban = "{\"success\":true,\"returnType\":\"FINISHED\",\"returnData\":"
-                + "{\"_TYPE\":\"ibanData\",\"iban\":\"AT12\"}}";
+    @DisplayName("a variant the discriminator does not name reads as null, never as an empty card")
+    void unmappedReturnDataReadsAsNull() throws Exception {
+        String unmapped = "{\"success\":true,\"returnType\":\"FINISHED\",\"returnData\":"
+                + "{\"_TYPE\":\"cryptoData\",\"address\":\"bc1q\"}}";
         String absent = "{\"success\":true,\"returnType\":\"FINISHED\"}";
         String notAnObject = "{\"success\":true,\"returnType\":\"FINISHED\",\"returnData\":\"unexpected\"}";
+        String noDiscriminatorAndNoCardFields =
+                "{\"success\":true,\"returnType\":\"FINISHED\",\"returnData\":{\"somethingElse\":\"x\"}}";
 
-        assertThat(mapper.readValue(iban, TransactionResponse.class).returnData().type()).isEqualTo("ibanData");
+        assertThat(mapper.readValue(unmapped, TransactionResponse.class).returnData()).isNull();
         assertThat(mapper.readValue(absent, TransactionResponse.class).returnData()).isNull();
         assertThat(mapper.readValue(notAnObject, TransactionResponse.class).returnData()).isNull();
+        assertThat(mapper.readValue(noDiscriminatorAndNoCardFields, TransactionResponse.class).returnData()).isNull();
     }
 
     @Test
     void transactionResponseExposesTheOutcome() {
         TransactionResponse redirect = new TransactionResponse(true, "uuid", "pid", ReturnType.REDIRECT,
-                RedirectType.IFRAME, "https://pay.example", null, null, null, "Creditcard", null,
+                RedirectType.IFRAME, "https://pay.example", null, null, null, "Creditcard", null, null,
                 Map.of("remainingAmount", "5"), null);
 
         assertThat(redirect.isRedirect()).isTrue();
@@ -293,7 +297,7 @@ class ModelTest {
         assertThat(redirect.errors()).isEmpty();
 
         TransactionResponse failed = new TransactionResponse(false, "uuid", "pid", ReturnType.ERROR,
-                null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, null,
                 List.of(new TransactionError("Request failed", 1000, "Invalid parameters given", "1234")));
 
         assertThat(failed.isError()).isTrue();
@@ -302,14 +306,14 @@ class ModelTest {
         assertThat(failed.errors()).hasSize(1);
 
         TransactionResponse pendingButUnsuccessful = new TransactionResponse(false, "uuid", "pid",
-                ReturnType.PENDING, null, null, null, null, null, null, null, null, null);
+                ReturnType.PENDING, null, null, null, null, null, null, null, null, null, null);
         assertThat(pendingButUnsuccessful.isError()).isTrue();
     }
 
     @Test
     void redirectResultCarriesWhatTheCallerMustPersist() {
         TransactionResponse response = new TransactionResponse(true, "uuid-1", "purchase-1", ReturnType.REDIRECT,
-                RedirectType.IFRAME, "https://pay.example/x", null, null, null, "Creditcard", null, null, null);
+                RedirectType.IFRAME, "https://pay.example/x", null, null, null, "Creditcard", null, null, null, null);
 
         RedirectResult result = RedirectResult.from(response);
 

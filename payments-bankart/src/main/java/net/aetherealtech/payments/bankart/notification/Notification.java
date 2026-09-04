@@ -1,4 +1,4 @@
-package net.aetherealtech.bankart.notification;
+package net.aetherealtech.payments.bankart.notification;
 
 import java.math.BigDecimal;
 import java.util.Map;
@@ -7,10 +7,12 @@ import java.util.Optional;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-import net.aetherealtech.bankart.model.CardData;
-import net.aetherealtech.bankart.model.CardDataDeserializer;
-import net.aetherealtech.bankart.model.Customer;
-import net.aetherealtech.bankart.model.TransactionType;
+import net.aetherealtech.payments.bankart.model.CardData;
+import net.aetherealtech.payments.bankart.model.Customer;
+import net.aetherealtech.payments.bankart.model.ReturnData;
+import net.aetherealtech.payments.bankart.model.ReturnDataDeserializer;
+import net.aetherealtech.payments.bankart.model.ScheduleData;
+import net.aetherealtech.payments.bankart.model.TransactionType;
 
 /**
  * An asynchronous status notification: the gateway's authoritative word on a transaction.
@@ -31,6 +33,10 @@ import net.aetherealtech.bankart.model.TransactionType;
  * @param notificationSource set to {@code reconciliation} or {@code settlement} when an amount or
  *                           currency changed after the fact, in which case {@code originalAmount}
  *                           carries what it used to be
+ * @param scheduleData the schedule this charge belongs to, present only when it belongs to one. This
+ *                     is the sole marker of a recurring charge: {@code transactionType} has no
+ *                     {@code SCHEDULE} value, so a schedule's own debit is delivered as a plain
+ *                     {@code DEBIT} and nothing else distinguishes it.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record Notification(
@@ -51,7 +57,8 @@ public record Notification(
         String originalCurrency,
         String merchantMetaData,
         Customer customer,
-        @JsonDeserialize(using = CardDataDeserializer.class) CardData returnData,
+        @JsonDeserialize(using = ReturnDataDeserializer.class) ReturnData returnData,
+        ScheduleData scheduleData,
         ChargebackData chargebackData,
         ChargebackReversalData chargebackReversalData,
         Map<String, Object> extraData) {
@@ -77,6 +84,16 @@ public record Notification(
 
     public boolean isChargeback() {
         return transactionType == TransactionType.CHARGEBACK;
+    }
+
+    /** True when this charge belongs to a schedule, which is the only signal that it is recurring. */
+    public boolean isScheduled() {
+        return scheduleData != null;
+    }
+
+    /** The instrument as a card, when that is what it was. Empty for iban, phone, wallet or nothing. */
+    public Optional<CardData> cardData() {
+        return returnData instanceof CardData card ? Optional.of(card) : Optional.empty();
     }
 
     /** Present when the amount or currency was restated during reconciliation or settlement. */

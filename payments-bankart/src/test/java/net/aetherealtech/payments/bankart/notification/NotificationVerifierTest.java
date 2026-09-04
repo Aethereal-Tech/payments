@@ -1,4 +1,4 @@
-package net.aetherealtech.bankart.notification;
+package net.aetherealtech.payments.bankart.notification;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -13,11 +13,11 @@ import java.time.ZoneOffset;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import net.aetherealtech.bankart.Fixtures;
-import net.aetherealtech.bankart.exception.BankartSignatureException;
-import net.aetherealtech.bankart.signing.BodyDigest;
-import net.aetherealtech.bankart.signing.HmacSigner;
-import net.aetherealtech.bankart.signing.SignedRequest;
+import net.aetherealtech.payments.bankart.Fixtures;
+import net.aetherealtech.payments.bankart.exception.BankartSignatureException;
+import net.aetherealtech.payments.bankart.signing.BodyDigest;
+import net.aetherealtech.payments.bankart.signing.HmacSigner;
+import net.aetherealtech.payments.bankart.signing.SignedRequest;
 
 /**
  * Verification is the security boundary of the callback: without it, anyone who learns a callback

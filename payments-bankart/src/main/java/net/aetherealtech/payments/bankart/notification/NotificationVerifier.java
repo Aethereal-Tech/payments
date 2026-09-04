@@ -1,4 +1,4 @@
-package net.aetherealtech.bankart.notification;
+package net.aetherealtech.payments.bankart.notification;
 
 import java.time.Clock;
 import java.time.Duration;
@@ -8,10 +8,10 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Objects;
 
-import net.aetherealtech.bankart.exception.BankartSignatureException;
-import net.aetherealtech.bankart.signing.BodyDigest;
-import net.aetherealtech.bankart.signing.HmacSigner;
-import net.aetherealtech.bankart.signing.SignedRequest;
+import net.aetherealtech.payments.bankart.exception.BankartSignatureException;
+import net.aetherealtech.payments.bankart.signing.BodyDigest;
+import net.aetherealtech.payments.bankart.signing.HmacSigner;
+import net.aetherealtech.payments.bankart.signing.SignedRequest;
 
 /**
  * Authenticates an inbound notification before anything acts on it.

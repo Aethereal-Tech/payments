@@ -1,0 +1,8 @@
+{
+  "success": false,
+  "scheduleId": "SC-1234-1234-1234-1234-1234-1234",
+  "oldStatus": "PAUSED",
+  "newStatus": "PAUSED",
+  "errorMessage": "The status of the schedule is not valid for the requested operation",
+  "errorCode": 7070
+}

@@ -1,4 +1,4 @@
-package net.aetherealtech.bankart.notification;
+package net.aetherealtech.payments.bankart.notification;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -9,9 +9,9 @@ import java.math.BigDecimal;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import net.aetherealtech.bankart.Fixtures;
-import net.aetherealtech.bankart.exception.BankartNotificationException;
-import net.aetherealtech.bankart.model.TransactionType;
+import net.aetherealtech.payments.bankart.Fixtures;
+import net.aetherealtech.payments.bankart.exception.BankartNotificationException;
+import net.aetherealtech.payments.bankart.model.TransactionType;
 
 /** Every fixture here is copied from the API reference's own notification examples. */
 class NotificationParserTest {
@@ -41,10 +41,10 @@ class NotificationParserTest {
         assertThat(notification.amount()).isEqualByComparingTo("9.99");
         assertThat(notification.currency()).isEqualTo("EUR");
         assertThat(notification.customer().firstName()).isEqualTo("John");
-        assertThat(notification.returnData().lastFourDigits()).isEqualTo("1111");
-        assertThat(notification.returnData().binBrand()).isEqualTo("VISA");
-        assertThat(notification.returnData().type()).isEqualTo("cardData");
-        assertThat(notification.returnData().brand()).isEqualTo("visa");
+        assertThat(notification.cardData().orElseThrow().lastFourDigits()).isEqualTo("1111");
+        assertThat(notification.cardData().orElseThrow().binBrand()).isEqualTo("VISA");
+        assertThat(notification.cardData().orElseThrow().type()).isEqualTo("cardData");
+        assertThat(notification.cardData().orElseThrow().brand()).isEqualTo("visa");
     }
 
     @Test
@@ -109,8 +109,8 @@ class NotificationParserTest {
         assertThat(notification.extra("lastCardUpdateResult")).contains("updated");
         assertThat(notification.extra("lastCardUpdateDate")).contains("2022-08-19");
         assertThat(notification.extra("absent")).isEmpty();
-        assertThat(notification.returnData().binBrand()).isEqualTo("MASTERCARD");
-        assertThat(notification.returnData().expiryYear()).isEqualTo("2050");
+        assertThat(notification.cardData().orElseThrow().binBrand()).isEqualTo("MASTERCARD");
+        assertThat(notification.cardData().orElseThrow().expiryYear()).isEqualTo("2050");
     }
 
     @Test
@@ -118,7 +118,7 @@ class NotificationParserTest {
         Notification notification = parser.parse(Fixtures.load("notification-network-token.json"));
 
         assertThat(notification.extra("networkTokenStatus")).contains("suspended");
-        assertThat(notification.returnData().binLevel()).isEqualTo("CLASSIC");
+        assertThat(notification.cardData().orElseThrow().binLevel()).isEqualTo("CLASSIC");
     }
 
     @Test
@@ -186,7 +186,7 @@ class NotificationParserTest {
 
     @Test
     void acceptsAnExplicitlySuppliedMapper() {
-        NotificationParser custom = new NotificationParser(net.aetherealtech.bankart.internal.Json.mapper());
+        NotificationParser custom = new NotificationParser(net.aetherealtech.payments.bankart.internal.Json.mapper());
 
         assertThat(custom.parse("{\"result\":\"OK\"}").isSuccess()).isTrue();
         assertThatNullPointerException().isThrownBy(() -> new NotificationParser(null));
