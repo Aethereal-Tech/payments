@@ -21,7 +21,7 @@ bin/
 .DS_Store
 Thumbs.db
 
-# Local overrides that must never reach a public repository
+# Local overrides that must never be committed — a settings.xml here would carry a real token
 settings.xml
 *.env
 .env
