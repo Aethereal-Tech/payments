@@ -116,7 +116,7 @@ class BankartPaymentProviderTest extends GatewayTestBase {
         RedirectTarget target = provider().startCheckout(
                 PaymentIntent.builder("order-1")
                         .amount(Money.of("9.99", "EUR"))
-                        .description("Kapar Premium")
+                        .description("Premium Plan")
                         .urls("https://k/s", "https://k/c", "https://k/e", "https://k/cb")
                         .customer(Customer.builder().reference("u-1").email("a@example.com")
                                 .name("Ана Петровска").countryCode("MK").vatNumber("MK4030000000000").build())
@@ -131,7 +131,7 @@ class BankartPaymentProviderTest extends GatewayTestBase {
         assertThat(body.get("merchantTransactionId").asText()).isEqualTo("order-1");
         assertThat(body.get("amount").asText()).isEqualTo("9.99");
         assertThat(body.get("currency").asText()).isEqualTo("EUR");
-        assertThat(body.get("description").asText()).isEqualTo("Kapar Premium");
+        assertThat(body.get("description").asText()).isEqualTo("Premium Plan");
         assertThat(body.get("successUrl").asText()).isEqualTo("https://k/s");
         assertThat(body.get("callbackUrl").asText()).isEqualTo("https://k/cb");
         assertThat(body.get("extraData").get("listing").asText()).isEqualTo("42");

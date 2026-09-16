@@ -57,15 +57,16 @@ Artifacts go to GitHub Packages.
 </repositories>
 ```
 
-**GitHub Packages always requires authentication, and this repository is private, so the token needs more
-than the usual `read:packages`.** Anonymous Maven downloads from `maven.pkg.github.com` return 401 for any
-repository regardless of visibility — that is a GitHub platform limitation, not a choice made here. On top of
-that, because these packages are private, the token must additionally be entitled to the organization's
-private packages:
+**Every request to GitHub Packages needs a token, even though this package is public.** Anonymous Maven
+downloads from `maven.pkg.github.com` return 401 whatever a repository's visibility is — a GitHub platform
+limitation, not a choice made here. Being public is what keeps the bar low: any authenticated token carrying
+`read:packages` resolves it —
 
-- a **classic** personal access token with **`read:packages` and `repo`**, held by an account with access to
-  `Aethereal-Tech/payments`; or
-- a **fine-grained** token granted access to this repository.
+- a **classic** personal access token with just that one scope; or
+- a **fine-grained** token, granted no special access; or
+- inside a GitHub Actions workflow, the run's own `GITHUB_TOKEN`.
+
+Neither `repo` scope nor membership of the Aethereal Tech organization is needed.
 
 `~/.m2/settings.xml`:
 
@@ -83,13 +84,11 @@ private packages:
 
 The `<id>` must match the `<repository><id>` above.
 
-**From another repository's GitHub Actions**, the workflow's own `GITHUB_TOKEN` is scoped to that repository
-and can never read this one's packages — GitHub Packages for Maven always inherit the permissions of the
-repository that published them, and there is no per-package Actions access grant to widen that. The only
-credential that works is a token of the kind above, given to the workflow as a secret (Aethereal-Tech
-repositories use the organization secret `PACKAGES_READ_TOKEN`, wired into `actions/setup-java` as
-`server-password: PACKAGES_READ_TOKEN`). A build that skips this fails while *resolving the dependency*, not
-at some later step — the error names the artifact, so it is at least self-explanatory.
+**From any GitHub Actions workflow** — this repository's own or another's — the run's default `GITHUB_TOKEN`
+resolves these packages; being public, no per-repository grant or organization secret needs to be minted or
+wired in the way a private package would require. A build that skips authentication entirely still fails while
+*resolving the dependency*, not at some later step — the error names the artifact, so it is at least
+self-explanatory.
 
 ## Upgrading from `bankart-gateway` 0.1.0
 
@@ -467,7 +466,8 @@ find duplicates surviving your dedupe, that assumption is the first thing to che
 belt-and-braces uniqueness constraint on the resource plus event type until a real account settles it.
 `occurredAt` is that same signature timestamp, for the same reason: it is the only time the payload carries.
 
-`SPECS.md` carries the full provisional inventory and the list of things only a real account can settle —
+`openspec/specs/agentaos-adapter` carries the full provisional inventory and the list of things only a real
+account can settle —
 among them whether test mode is a separate backend or a flag on the same one, the true event catalogue and
 its retry policy, the numeric rate limit, and whether a refund API exists at all. **It does not in the SDK,
 so this adapter does not declare `REFUND` and refuses rather than inventing an endpoint.**
