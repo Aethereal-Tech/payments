@@ -1,0 +1,49 @@
+schema: spec-driven
+
+context: |
+  payments: a standalone, private-turned-public Maven reactor (JDK 25) publishing three artifacts from one
+  commit at one version — net.aetherealtech:payments-core, payments-bankart and payments-agentaos.
+  payments-core is the provider-neutral PaymentProvider SPI (checkout, webhooks, reconcile, subscription
+  cancellation, refund), the sealed PaymentEvent hierarchy, the typed refusals, and RecordingPaymentProvider —
+  zero runtime dependencies, which is the artifact's whole promise. payments-bankart is the Bankart
+  (white-label IXOPAY) Transaction API v3 client and its PaymentProvider — Jackson, and nothing else.
+  payments-agentaos is the AgentaOS gateway client and its PaymentProvider, carrying its own internal JSON
+  reader instead of a library so it too stays at zero runtime dependencies. The split is about the
+  DEPENDENCY, not tidiness: a consumer that only talks to AgentaOS must never receive Jackson.
+  The inversion that matters across both adapters: no configuration for a gateway means no
+  PaymentProvider bean for it, and an EMPTY PaymentProviderRegistry stays valid rather than refusing to
+  start — a consumer with no merchant credentials yet is not a broken consumer.
+  Every field name, path, enum value and header comes from the provider's own published material: Bankart's
+  sandbox OpenAPI specification and prose documentation (which disagree with each other in named, tested
+  ways), and — because no AgentaOS API reference exists anywhere — the open-source `@agentaos/pay` TypeScript
+  SDK's own source, which states what a client SENDS rather than what a server ACCEPTS. Anything not read
+  verbatim there is `@Provisional`, with its evidence named and its inventory pinned by a test.
+  No test ever reaches a live gateway; WireMock and independently-computed signature vectors stand in for
+  both. CLAUDE.md holds every rule that binds a change; read it first. These specs are the record of what is
+  built, including the invariants and the reasons a reader would otherwise undo. Commits carry no AI
+  attribution.
+  A change's Status carries one of three tags: CUT means decided against, do not re-propose; PARKED may
+  return and states the condition that reopens it; a change with neither tag is simply not built yet. Every
+  change names who owns its prerequisite.
+
+rules:
+  proposal:
+    - 'Carry a "## Status" section carrying the tag (PARKED, CUT or none), why it waits, what reopens it and who owns the prerequisite.'
+    - Never re-propose what a CUT change already recorded as decided against.
+  specs:
+    - Keep the reasoning under each requirement as prose; the record holds what a reader cannot see by opening a class.
+    - Names, endpoints, headers, enum values, numbers and evidence citations stay verbatim.
+    - SHALL or MUST in the requirement sentence; scenarios are the source's own concrete cases, never invented ones.
+  design:
+    - A decision the maintainer has already taken is recorded as taken, with its date, and is not reopened.
+    - pom.xml coordinates and versions change only with a reason stated in the PR description (CLAUDE.md).
+  tasks:
+    - Every task names how it is verified, the test that fails without it and the tier it runs in.
+
+operations:
+  apply:
+    guidance:
+      - Before reporting a task done, run the verification ladder CLAUDE.md prescribes and say what was not run.
+  archive:
+    guidance:
+      - Archive in the same commit that ships the change, then run openspec validate --all --strict.

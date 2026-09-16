@@ -467,7 +467,8 @@ find duplicates surviving your dedupe, that assumption is the first thing to che
 belt-and-braces uniqueness constraint on the resource plus event type until a real account settles it.
 `occurredAt` is that same signature timestamp, for the same reason: it is the only time the payload carries.
 
-`SPECS.md` carries the full provisional inventory and the list of things only a real account can settle —
+`openspec/specs/agentaos-adapter` carries the full provisional inventory and the list of things only a real
+account can settle —
 among them whether test mode is a separate backend or a flag on the same one, the true event catalogue and
 its retry policy, the numeric rate limit, and whether a refund API exists at all. **It does not in the SDK,
 so this adapter does not declare `REFUND` and refuses rather than inventing an endpoint.**

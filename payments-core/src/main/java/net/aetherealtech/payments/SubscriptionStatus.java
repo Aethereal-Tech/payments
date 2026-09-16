@@ -4,7 +4,8 @@ package net.aetherealtech.payments;
  * A subscription's state, in one vocabulary regardless of which provider reported it.
  *
  * <p>This is the enum a consumer gates access on, so each adapter documents its own mapping from the
- * provider's spelling — see each adapter's {@code SPECS.md} table — and none of them invents a value.
+ * provider's spelling — see each adapter's status-mapping table under {@code openspec/specs/} — and none of
+ * them invents a value.
  *
  * <p>{@link #UNKNOWN} is the one addition to the seven states a consumer asked for, and it exists so an
  * unrecognised provider status has somewhere to land that is not a wrong answer. A provider adding a

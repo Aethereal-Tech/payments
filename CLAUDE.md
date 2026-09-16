@@ -2,8 +2,9 @@
 
 A standalone, private library reactor. These are its own rules; nothing here inherits from another repo.
 
-**`SPECS.md` is the record of what exists** — the artifacts, the SPI, each adapter's wire facts and status
-mappings, the consumers, and the planned work with its reasons; this file is the rules alone.
+**The record of what exists is `openspec/`** — `specs/<capability>/spec.md` holds the artifacts, the SPI and
+each adapter's wire facts and status mappings, `changes/<name>/` the planned, parked, shelved or cut work,
+why it waits and who owns its prerequisite; this file is the rules alone.
 
 ## The shape
 
@@ -31,9 +32,9 @@ consumer resolve `payments-core:0.3.0` against `payments-bankart:0.1.0` and meet
 Every field name, path, enum value and header comes from the provider's own published material. Do not
 invent fields, guess at shapes, or copy them from another integration. If something is needed and not
 documented, read the source again first; if it genuinely is not there, model it defensively, say so in a
-code comment, and record it — in the README's "Open questions" for Bankart, in `SPECS.md`'s provisional
-inventory for AgentaOS. Those sections are part of the deliverable: they are how a reader tells what we know
-from what we assumed.
+code comment, and record it — in the README's "Open questions" for Bankart, in `openspec/specs/agentaos-adapter`'s
+provisional inventory for AgentaOS. Those sections are part of the deliverable: they are how a reader tells what
+we know from what we assumed.
 
 Where a source contradicts itself, the reproducible behaviour wins over the prose, and the discrepancy gets
 a test that pins it plus a note saying which way we went and why. `HmacSignerTest` is the worked example.
@@ -81,6 +82,7 @@ JDK 25.
 
 ```bash
 JAVA_HOME=$(/usr/libexec/java_home -v 25) ./mvnw clean verify
+openspec validate --all --strict
 ```
 
 **Read Maven's own exit code.** A pipe reports the pipe's status. Run the whole reactor before proposing a
@@ -107,9 +109,12 @@ resolves, what breaks if it changes. Never restate the code. A comment saying "H
 above a line that HMAC-SHA512s the message is noise; one saying the docs' published vector only reproduces
 with the API key substituted is the reason the line looks odd.
 
-**These documents follow the same rule: `CLAUDE.md` for rules, `SPECS.md` for the record, `README.md` for
-the consumer — nothing else.** When a FUTURE item lands, it moves to PRESENT in the same commit that ships
-it.
+**These documents follow the same rule: `CLAUDE.md` for rules, `openspec/` for the record, `README.md` for
+the consumer, and `AGENTS.md` only to point other agents at them — there is no `docs/` and no other
+prose record.** `openspec/specs/<capability>/spec.md` holds what is built, its invariants and the reasons a
+reader would otherwise undo; `openspec/changes/<name>/` holds what is planned, parked, shelved or cut, why it
+waits and who owns the prerequisite. **A new rule or invariant is written into its spec in the same commit as
+the code**, and `openspec validate --all --strict` must pass.
 
 ## Versioning and publishing
 
