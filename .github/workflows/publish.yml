@@ -177,8 +177,9 @@ jobs:
           {
             echo "Built from \`$(git rev-parse --short HEAD)\`, which passed CI in full."
             echo
-            echo "Maven, on GitHub Packages — see the README's \"Install\" section. This is a PRIVATE"
-            echo "repository, so a token needs access to the organization's private packages."
+            echo "Maven, on GitHub Packages — see the README's \"Install\" section. A token is still"
+            echo "required for every request (anonymous downloads return 401 regardless of visibility),"
+            echo "but any token carrying \`read:packages\` resolves it now that these packages are public."
             echo
             echo "- \`net.aetherealtech:payments-core:${VERSION}\` — the provider-neutral SPI, the events and the recording test double. No runtime dependencies."
             echo "- \`net.aetherealtech:payments-bankart:${VERSION}\` — the Bankart (IXOPAY) Transaction API v3 client and its adapter. One runtime dependency: Jackson."

@@ -1,6 +1,6 @@
 # Conventions for this repository
 
-A standalone, private library reactor. These are its own rules; nothing here inherits from another repo.
+A standalone library reactor. These are its own rules; nothing here inherits from another repo.
 
 **The record of what exists is `openspec/`** — `specs/<capability>/spec.md` holds the artifacts, the SPI and
 each adapter's wire facts and status mappings, `changes/<name>/` the planned, parked, shelved or cut work,
@@ -132,7 +132,8 @@ comment naming the pull request or commit. Merged branches only: a parked branch
 lands. A branch that outlives its merge gets built on by mistake; an issue that outlives its fix gets
 planned twice.
 
-**This is a PRIVATE repository.** A consuming build needs a token with access to the organization's private
-packages — `read:packages` alone is not enough, unlike a public GitHub Packages artifact. Keep the README's
-Install section saying so, and keep it free of "public" wording and of any invitation to outside
-contributors.
+**This repository is PUBLIC, but GitHub Packages still requires a token for every request.** Anonymous Maven
+downloads from `maven.pkg.github.com` return 401 regardless of a repository's visibility — a platform
+limitation, not a choice made here. Being public is what keeps the bar low: any authenticated token carrying
+`read:packages` resolves it, with no `repo` scope, no fine-grained grant to this repository, and no membership
+of the Aethereal Tech organization needed. Keep the README's Install section matching this exactly.
